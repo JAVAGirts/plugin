@@ -1,4 +1,12 @@
-String st = "A";
-char c = st.charAt(0);
-String s = "\\u" + Integer.toHexString((int)c + 57360);
-char a = (char)Integer.parseInt(s.substring(2), 16);
+	static String getSymbol(String input) {
+
+		String temp = "";
+		String temp1 = "\\u00" + input;
+		char temp2 = (char) Integer.parseInt(temp1.substring(2), 16);
+
+		String s = "\\u" + Integer.toHexString((byte) temp2 + 57360);
+		char a = (char) Integer.parseInt(s.substring(2), 16);
+		temp += String.valueOf(a);
+
+		return temp;
+	}
