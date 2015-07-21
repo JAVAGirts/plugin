@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Generated-from: 1257864022000;type=2
+Bundle-ManifestVersion: 2
+Bundle-Name: GreenRealizationRelationship Plug-in
+Bundle-SymbolicName: edu.buffalo.cse.green.relationship.realization; singleton:=true
+Bundle-Version: 3.5.0
+Bundle-ClassPath: GreenRealizationRelationship.jar
+Bundle-Vendor: University at Buffalo, State University of New York
+Bundle-Localization: plugin
+Export-Package: edu.buffalo.cse.green.relationship.realization
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.jdt.core,
+ org.eclipse.draw2d,
+ org.eclipse.gef,
+ edu.buffalo.cse.green
+Eclipse-LazyStart: true

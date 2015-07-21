@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: net.sourceforge.ehep;singleton:=true
+Bundle-Version: 1.1.0
+Bundle-ClassPath: ehep.jar
+Bundle-Activator: net.sourceforge.ehep.EhepPlugin
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.co
+ re.resources,org.eclipse.ui.ide,org.eclipse.ui.editors,org.eclipse.ui
+ .workbench.texteditor
+Bundle-ActivationPolicy: lazy
+Export-Package: net.sourceforge.ehep,net.sourceforge.ehep.actions,net.
+ sourceforge.ehep.core,net.sourceforge.ehep.editors,net.sourceforge.eh
+ ep.events,net.sourceforge.ehep.gui,net.sourceforge.ehep.popup.actions
+ ,net.sourceforge.ehep.preferences
+Bundle-ManifestVersion: 2
+
