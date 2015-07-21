@@ -1,0 +1,40 @@
+		void pageDump() 
+		{
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		FillLayout layout = new FillLayout();
+		composite.setLayout(layout);
+		text.setEditable(true);
+		int index = addPage(composite);
+		setPageText(index, "Dump");
+		
+		table = new Table(composite, SWT.BORDER);
+		table.setHeaderVisible(true);
+		 for (int loopIndex = 0; loopIndex < 1; loopIndex++) {
+		      TableColumn column = new TableColumn(table, SWT.CENTER);
+		      column.setText("Dump");
+		      column.setWidth(180);
+		 }
+		 font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		 
+		 table.setFont(font);
+		 text.setFont(font);
+		
+	}
+	
+	
+	void dumpLineWrapper()
+	{
+		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		String splittedString[] = editorText.split("(?<=\\G.{" + 16 + "})");
+
+		table.clearAll();
+		table.removeAll();
+	
+		for(int i = 0; i < splittedString.length; i++) 
+		{
+			TableItem tmpRow = new TableItem(table, SWT.CENTER);
+			tmpRow.setText(splittedString[i]);
+		}
+		
+	}
+	
