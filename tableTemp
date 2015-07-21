@@ -1,0 +1,49 @@
+	void createPage2() {
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		FillLayout layout = new FillLayout();
+		composite.setLayout(layout);
+		text = new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL);
+		text.setEditable(false);
+		int index = addPage(composite);
+		setPageText(index, "Preview");
+		
+		table = new Table(composite, SWT.BORDER);
+		table.setHeaderVisible(true);
+		 for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
+		      TableColumn column = new TableColumn(table, SWT.CENTER);
+		      column.setText(".");
+		      column.setWidth(40);
+		    }
+
+	}
+
+	void sortWords() {
+
+		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		
+		text.setText(editorText.toString());
+		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		text.setFont(font);
+		String hexText = text.getText();
+
+		String st = hexText;
+		String temp = "";
+		for(int i = 0; i < st.length(); i++){
+			char c = st.charAt(i);
+			String s = "\\u" + Integer.toHexString((int) c + 57360);
+			char a = (char) Integer.parseInt(s.substring(2), 16);
+			temp += String.valueOf(a);
+			System.out.println(temp);
+		}
+		
+//		TableItem item1 = new TableItem(table, SWT.CENTER);
+//		item1.setText(String.valueOf(temp.charAt(0)));
+		
+		for(int i=0; i<temp.length(); i++){
+			TableItem item1 = new TableItem(table, SWT.CENTER);
+			item1.setText(String.valueOf(temp.charAt(i)));
+			
+		}
+		
+		text.setText(temp);
+	}
