@@ -1,5 +1,5 @@
-		void pageDump() 
-		{
+	void pageDump() 
+	{
 		Composite composite = new Composite(getContainer(), SWT.NONE);
 		FillLayout layout = new FillLayout();
 		composite.setLayout(layout);
