@@ -21,8 +21,10 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -143,7 +145,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		 for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
 		      TableColumn column = new TableColumn(table, SWT.CENTER);
 		      column.setText(String.valueOf(loopIndex));
-		      column.setWidth(40);
+		      column.setWidth(50);
 		      column.setResizable(false);
 		 }
 		 
@@ -151,7 +153,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	    tableEditor.horizontalAlignment = SWT.LEFT;
 	    tableEditor.grabHorizontal = true;
 		 
-		 table.addListener(SWT.MouseDown, new Listener() {
+	    table.addListener(SWT.MouseDoubleClick, new Listener() {
 		
 			  public void handleEvent(Event event){
 		        Control old = tableEditor.getEditor();
@@ -194,12 +196,24 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		        final int col = column;
 		        text.addModifyListener(new ModifyListener() {
 		          public void modifyText(ModifyEvent event) {
-		            item.setText(col, text.getText());
+		            item.setText(col, getHexString(text));
+		            
 		          }
 		        });
 				
 			}
 			
+		});
+	    
+	    table.addListener(SWT.MouseDown, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+		        Control old = tableEditor.getEditor();
+		        if (old != null)
+		          old.dispose();
+				
+			}
 		});
 
 	}
@@ -367,7 +381,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 			}
 			else if(dataSize > 16){
 				
-				TableItem item1 = new TableItem(table, SWT.CENTER);
+				TableItem item1 = new TableItem(table, SWT.NONE);
 				for(int i = data.size() - dataSize; i < key*16; i++){
 					item1.setText(index, data.get(i));
 					index++;
@@ -397,5 +411,13 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		
 		return temp;
 	}
+	
+	public String getHexString(Text text){
+		String hexText = text.getText();
+		
+		return getFontString(hexText);
+	}
+	
+	
 	
 }
