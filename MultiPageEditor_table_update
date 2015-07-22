@@ -21,10 +21,8 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -66,6 +64,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	private Table table;
 
 	private String hexText;
+
+	String beforeText;
 
 	/**
 	 * Creates a multi-page editor example.
@@ -184,6 +184,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 				final Text text = new Text(table, SWT.NONE);
 				text.setForeground(item.getForeground());
 
+				beforeText = item.getText(column);
+
 				text.setText(item.getText(column));
 				text.setForeground(item.getForeground());
 				text.selectAll();
@@ -196,8 +198,18 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 				final int col = column;
 				text.addModifyListener(new ModifyListener() {
 					public void modifyText(ModifyEvent event) {
-						item.setText(col, getTableString(text.getText()));
-
+						String changedText = getTableString(text.getText());
+						item.setText(col, changedText);
+						String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+						StringBuilder myName = new StringBuilder(editorT);
+						int i = Integer.parseInt(text.getText(), 16);
+						if (col < myName.length()) {
+							myName.setCharAt(col, (char) i);
+						} else if (col == myName.length()) {
+							myName.append((char) i);
+						}
+						editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(myName.toString());
+						//item.setForeground(col, new Color(Display.getCurrent(), 0, 255, 0));
 					}
 				});
 
@@ -292,6 +304,23 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		} else if (newPageIndex == 3) {
 			showFontTable();
 		}
+	}
+
+	void sortPage0() {
+		/*
+		 * String editorText =
+		 * editor.getDocumentProvider().getDocument(editor.getEditorInput()).get
+		 * ();
+		 * 
+		 * text.setText(editorText.toString()); font = new
+		 * Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		 * text.setFont(font); hexText = text.getText();
+		 * 
+		 * String temp = getFontString(hexText);
+		 * 
+		 * text.setText(temp);
+		 */
+
 	}
 
 	/**
@@ -394,20 +423,19 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		}
 
 	}
-	
-	public String getTableString(String tableText){
-		if(tableText.matches("[0-9A-Fa-f]{2}")){
-			String temp1 =  "\\u00" + tableText;
+
+	public String getTableString(String tableText) {
+		if (tableText.matches("[0-9A-Fa-f]{2}")) {
+			String temp1 = "\\u00" + tableText;
 			char temp2 = (char) Integer.parseInt(temp1.substring(2), 16);
 
 			String s = "\\u" + Integer.toHexString((short) temp2 + 57360);
 			char a = (char) Integer.parseInt(s.substring(2), 16);
 			return String.valueOf(a);
+		} else {
+			return beforeText;
 		}
-		else{
-			return tableText;
-		}
-		
+
 	}
 
 	public String getFontString(String hexText) {
