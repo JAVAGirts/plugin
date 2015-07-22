@@ -218,7 +218,15 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 							item.setText(col, "");
 							tempt = tempt.substring(0, tempt.length()-1);
 							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
-						}else{
+						}
+						else if(text.getText().equals("")){
+							String tempt = builderText.toString();
+							item.setText(col, "");
+							tempt = tempt.substring(0, itemc) + tempt.substring(itemc+1, tempt.length());
+							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
+							showFontTable();
+						}
+						else{
 							String changedText = getTableString(text.getText());
 							item.setText(col, changedText);
 							int i = Integer.parseInt(text.getText(), 16);
