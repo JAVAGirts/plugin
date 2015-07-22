@@ -1,0 +1,486 @@
+
+package hex.editors;
+
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FontDialog;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.*;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.ide.IDE;
+
+/**
+ * An example showing how to create a multi-page editor. This example has 3
+ * pages:
+ * <ul>
+ * <li>page 0 contains a nested text editor.
+ * <li>page 1 allows you to change the font used in page 2
+ * <li>page 2 shows the words in page 0 in sorted order
+ * </ul>
+ */
+public class MultiPageEditor extends MultiPageEditorPart implements IResourceChangeListener {
+
+	/** The text editor used in page 0. */
+	private TextEditor editor;
+	private TableEditor tableEditor;
+
+	/** The font chosen in page 1. */
+	private Font font;
+
+	/** The text widget used in page 2. */
+	private StyledText text;
+
+	private Table table;
+
+	private String hexText;
+
+	String beforeText;
+	String someText;
+
+	/**
+	 * Creates a multi-page editor example.
+	 */
+	public MultiPageEditor() {
+		super();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+	}
+
+	/**
+	 * Creates page 0 of the multi-page editor, which contains a text editor.
+	 */
+	void createPage0() {
+		try {
+			editor = new TextEditor();
+			int index = addPage(editor, getEditorInput());
+			setPageText(index, editor.getTitle());
+		} catch (PartInitException e) {
+			ErrorDialog.openError(getSite().getShell(), "Error creating nested text editor", null, e.getStatus());
+		}
+	}
+
+	/**
+	 * Creates page 1 of the multi-page editor, which allows you to change the
+	 * font used in page 2.
+	 */
+	void createPage1() {
+
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		GridLayout layout = new GridLayout();
+		composite.setLayout(layout);
+		layout.numColumns = 2;
+
+		Button fontButton = new Button(composite, SWT.NONE);
+		GridData gd = new GridData(GridData.BEGINNING);
+		gd.horizontalSpan = 2;
+		fontButton.setLayoutData(gd);
+		fontButton.setText("Change Font...");
+
+		fontButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				setFont();
+			}
+		});
+
+		int index = addPage(composite);
+		setPageText(index, "Properties");
+	}
+
+	/**
+	 * Creates page 2 of the multi-page editor, which shows the sorted text.
+	 */
+	void createPage2() {
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		FillLayout layout = new FillLayout();
+		composite.setLayout(layout);
+		text = new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL);
+		text.setEditable(false);
+		int index = addPage(composite);
+		setPageText(index, "Preview");
+
+	}
+
+	/**
+	 * Creates page 3 of the multi-page editor, which shows the table.
+	 */
+	void createPage3() {
+		Composite composite = new Composite(getContainer(), SWT.NONE);
+		FillLayout layout = new FillLayout();
+		composite.setLayout(layout);
+		int index = addPage(composite);
+		setPageText(index, "CharTable");
+
+		table = new Table(composite, SWT.SINGLE | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
+			TableColumn column = new TableColumn(table, SWT.CENTER);
+			column.setText(String.valueOf(loopIndex));
+			column.setWidth(50);
+			column.setResizable(false);
+		}
+
+		tableEditor = new TableEditor(table);
+		tableEditor.horizontalAlignment = SWT.LEFT;
+		tableEditor.grabHorizontal = true;
+
+		table.addListener(SWT.MouseDoubleClick, new Listener() {
+
+			public void handleEvent(Event event) {
+				Control old = tableEditor.getEditor();
+				if (old != null)
+					old.dispose();
+
+				Point pt = new Point(event.x, event.y);
+
+				final TableItem item = table.getItem(pt);
+
+				if (item == null) {
+					return;
+				}
+
+				int column = -1;
+				int index = -1;
+				for (int i = 0, n = table.getColumnCount(); i < n; i++) {
+					Rectangle rect = item.getBounds(i);
+					if (rect.contains(pt)) {
+						column = i;
+						index = table.indexOf(item);
+						break;
+					}
+				}
+				
+				int itemCount = -1;
+				for (int i = 0, n = table.getItemCount(); i < n; i++) {
+					Rectangle rect = item.getBounds(i);
+					if (rect.contains(pt)) {
+						itemCount = i;
+						break;
+					}
+				}
+
+				if (column == -1) {
+					return;
+				}
+
+				final Text text = new Text(table, SWT.NONE);
+				text.setForeground(item.getForeground());
+
+				beforeText = item.getText(column);
+
+				text.setText(item.getText(column));
+				text.setForeground(item.getForeground());
+				text.selectAll();
+				text.setFocus();
+
+				tableEditor.minimumWidth = text.getBounds().width;
+
+				tableEditor.setEditor(text, item, column);
+
+				final int col = column;
+				final int itemc = index * 16 + col;
+				text.addModifyListener(new ModifyListener() {
+					public void modifyText(ModifyEvent event) {
+						String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+						StringBuilder builderText = new StringBuilder(editorT);
+						
+						if(text.getText().equals("") && itemc == builderText.length() - 1){
+							String tempt = builderText.toString();
+							item.setText(col, "");
+							tempt = tempt.substring(0, itemc) + tempt.substring(itemc+1, tempt.length());
+							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
+						}else if(text.getText().length() == 2){
+							
+							String changedText = getTableString(text.getText());
+							item.setText(col, changedText);
+							int i = Integer.parseInt(text.getText(), 16);
+							if (itemc < builderText.length()) {
+								builderText.setCharAt(itemc, (char) i);
+							} else if (itemc == builderText.length()) {
+								builderText.append((char) i);
+							}
+							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(builderText.toString());
+						}
+						//item.setForeground(col, new Color(Display.getCurrent(), 0, 255, 0));
+					}
+				});
+
+			}
+
+		});
+
+		table.addListener(SWT.MouseDown, new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				Control old = tableEditor.getEditor();
+				if (old != null)
+					old.dispose();
+
+			}
+		});
+
+	}
+
+	/**
+	 * Creates the pages of the multi-page editor.
+	 */
+	protected void createPages() {
+		createPage0();
+		createPage1();
+		createPage2();
+		createPage3();
+	}
+
+	/**
+	 * The <code>MultiPageEditorPart</code> implementation of this
+	 * <code>IWorkbenchPart</code> method disposes all nested editors.
+	 * Subclasses may extend.
+	 */
+	public void dispose() {
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+		super.dispose();
+	}
+
+	/**
+	 * Saves the multi-page editor's document.
+	 */
+	public void doSave(IProgressMonitor monitor) {
+		getEditor(0).doSave(monitor);
+	}
+
+	/**
+	 * Saves the multi-page editor's document as another file. Also updates the
+	 * text for page 0's tab, and updates this multi-page editor's input to
+	 * correspond to the nested editor's.
+	 */
+	public void doSaveAs() {
+		IEditorPart editor = getEditor(0);
+		editor.doSaveAs();
+		setPageText(0, editor.getTitle());
+		setInput(editor.getEditorInput());
+	}
+
+	/*
+	 * (non-Javadoc) Method declared on IEditorPart
+	 */
+	public void gotoMarker(IMarker marker) {
+		setActivePage(0);
+		IDE.gotoMarker(getEditor(0), marker);
+	}
+
+	/**
+	 * The <code>MultiPageEditorExample</code> implementation of this method
+	 * checks that the input is an instance of <code>IFileEditorInput</code>.
+	 */
+	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
+		if (!(editorInput instanceof IFileEditorInput))
+			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
+		super.init(site, editorInput);
+	}
+
+	/*
+	 * (non-Javadoc) Method declared on IEditorPart.
+	 */
+	public boolean isSaveAsAllowed() {
+		return true;
+	}
+
+	/**
+	 * Calculates the contents of page 2 when the it is activated.
+	 */
+	protected void pageChange(int newPageIndex) {
+		super.pageChange(newPageIndex);
+		if (newPageIndex == 2) {
+			sortWords();
+		} else if (newPageIndex == 3) {
+			showFontTable();
+		}
+	}
+
+	void sortPage0() {
+		/*
+		 * String editorText =
+		 * editor.getDocumentProvider().getDocument(editor.getEditorInput()).get
+		 * ();
+		 * 
+		 * text.setText(editorText.toString()); font = new
+		 * Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		 * text.setFont(font); hexText = text.getText();
+		 * 
+		 * String temp = getFontString(hexText);
+		 * 
+		 * text.setText(temp);
+		 */
+
+	}
+
+	/**
+	 * Closes all project files on project close.
+	 */
+	public void resourceChanged(final IResourceChangeEvent event) {
+		if (event.getType() == IResourceChangeEvent.PRE_CLOSE) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					IWorkbenchPage[] pages = getSite().getWorkbenchWindow().getPages();
+					for (int i = 0; i < pages.length; i++) {
+						if (((FileEditorInput) editor.getEditorInput()).getFile().getProject()
+								.equals(event.getResource())) {
+							IEditorPart editorPart = pages[i].findEditor(editor.getEditorInput());
+							pages[i].closeEditor(editorPart, true);
+						}
+					}
+				}
+			});
+		}
+	}
+
+	/**
+	 * Sets the font related data to be applied to the text in page 2.
+	 */
+	public void setFont() {
+		FontDialog fontDialog = new FontDialog(getSite().getShell());
+		fontDialog.setFontList(text.getFont().getFontData());
+		FontData fontData = fontDialog.open();
+		if (fontData != null) {
+			if (font != null)
+				font.dispose();
+			font = new Font(text.getDisplay(), fontData);
+			text.setFont(font);
+		}
+	}
+
+	/**
+	 * Sorts the words in page 0, and shows them in page 2.
+	 */
+	void sortWords() {
+
+		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		
+		//editorText = editorText.substring(0, 100);
+
+		text.setText(editorText.toString());
+		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		text.setFont(font);
+		hexText = text.getText();
+
+		String temp = getFontString(hexText);
+
+		text.setText(temp);
+
+	}
+
+	void showFontTable() {
+		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		//editorText = editorText.substring(table.getTopIndex(), table.getTopIndex() + 1000);
+		text.setText(editorText.toString());
+		hexText = text.getText();
+
+		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		table.setFont(font);
+
+		table.removeAll();
+
+		ArrayList<String> data = new ArrayList<>();
+
+		for (int i = 0; i < getFontString(hexText).length(); i++) {
+			data.add(String.valueOf(getFontString(hexText).charAt(i)));
+		}
+
+		int dataSize = data.size();
+		int j = 0, key = 1;
+
+		while (dataSize > 0) {
+			int index = 0;
+
+			if (dataSize <= 16) {
+				TableItem item1 = new TableItem(table, SWT.CENTER);
+				for (int i = j * 16; i < data.size(); i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize = 0;
+			} else if (dataSize > 16) {
+
+				TableItem item1 = new TableItem(table, SWT.NONE);
+				for (int i = data.size() - dataSize; i < key * 16; i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize -= 16;
+
+				j++;
+			}
+
+			key++;
+
+		}
+
+	}
+
+	public String getTableString(String tableText) {
+		if (tableText.matches("[0-9A-Fa-f]{2}")) {
+			String temp1 = "\\u00" + tableText;
+			char temp2 = (char) Integer.parseInt(temp1.substring(2), 16);
+
+			String s = "\\u" + Integer.toHexString((short) temp2 + 57360);
+			char a = (char) Integer.parseInt(s.substring(2), 16);
+			return String.valueOf(a);
+		} else {
+			return beforeText;
+		}
+
+	}
+
+	public String getFontString(String hexText) {
+		String temp = "";
+
+		for (int i = 0; i < hexText.length(); i++) {
+			char c = hexText.charAt(i);
+			String s = "\\u" + Integer.toHexString((short) c + 57360);
+			char a = (char) Integer.parseInt(s.substring(2), 16);
+			temp += String.valueOf(a);
+		}
+
+		return temp;
+	}
+
+	public String getHexString(Text text) {
+		String hexText = text.getText();
+
+		return getFontString(hexText);
+	}
+
+}
