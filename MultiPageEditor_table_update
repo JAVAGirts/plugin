@@ -1,5 +1,5 @@
-package hex.editors;
 
+package hex.editors;
 
 import java.util.ArrayList;
 
@@ -62,9 +62,9 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
 	/** The text widget used in page 2. */
 	private StyledText text;
-	
+
 	private Table table;
-	
+
 	private String hexText;
 
 	/**
@@ -128,91 +128,91 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		setPageText(index, "Preview");
 
 	}
-	
+
 	/**
 	 * Creates page 3 of the multi-page editor, which shows the table.
 	 */
-	void createPage3(){
+	void createPage3() {
 		Composite composite = new Composite(getContainer(), SWT.NONE);
 		FillLayout layout = new FillLayout();
 		composite.setLayout(layout);
 		int index = addPage(composite);
 		setPageText(index, "CharTable");
-	    
+
 		table = new Table(composite, SWT.SINGLE | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		 for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
-		      TableColumn column = new TableColumn(table, SWT.CENTER);
-		      column.setText(String.valueOf(loopIndex));
-		      column.setWidth(50);
-		      column.setResizable(false);
-		 }
-		 
+		for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
+			TableColumn column = new TableColumn(table, SWT.CENTER);
+			column.setText(String.valueOf(loopIndex));
+			column.setWidth(50);
+			column.setResizable(false);
+		}
+
 		tableEditor = new TableEditor(table);
-	    tableEditor.horizontalAlignment = SWT.LEFT;
-	    tableEditor.grabHorizontal = true;
-		 
-	    table.addListener(SWT.MouseDoubleClick, new Listener() {
-		
-			  public void handleEvent(Event event){
-		        Control old = tableEditor.getEditor();
-		        if (old != null)
-		          old.dispose();
-		
-		        Point pt = new Point(event.x, event.y);
-		
-		        final TableItem item = table.getItem(pt);
-		    
-		        if (item == null) {
-		          return;
-		        }
-		        
-		        int column = -1;
-		        for (int i = 0, n = table.getColumnCount(); i < n; i++) {
-		          Rectangle rect = item.getBounds(i);
-		          if (rect.contains(pt)) {
-		            column = i;
-		            break;
-		          }
-		        }
-		
-		        if (column == -1) {
-		          return;
-		        }
-		        
-		        final Text text = new Text(table, SWT.NONE);
-		        text.setForeground(item.getForeground());
-		
-		        text.setText(item.getText(column));
-		        text.setForeground(item.getForeground());
-		        text.selectAll();
-		        text.setFocus();
-		
-		        tableEditor.minimumWidth = text.getBounds().width;
-		
-		        tableEditor.setEditor(text, item, column);
-		
-		        final int col = column;
-		        text.addModifyListener(new ModifyListener() {
-		          public void modifyText(ModifyEvent event) {
-		            item.setText(col, getHexString(text));
-		            
-		          }
-		        });
-				
+		tableEditor.horizontalAlignment = SWT.LEFT;
+		tableEditor.grabHorizontal = true;
+
+		table.addListener(SWT.MouseDoubleClick, new Listener() {
+
+			public void handleEvent(Event event) {
+				Control old = tableEditor.getEditor();
+				if (old != null)
+					old.dispose();
+
+				Point pt = new Point(event.x, event.y);
+
+				final TableItem item = table.getItem(pt);
+
+				if (item == null) {
+					return;
+				}
+
+				int column = -1;
+				for (int i = 0, n = table.getColumnCount(); i < n; i++) {
+					Rectangle rect = item.getBounds(i);
+					if (rect.contains(pt)) {
+						column = i;
+						break;
+					}
+				}
+
+				if (column == -1) {
+					return;
+				}
+
+				final Text text = new Text(table, SWT.NONE);
+				text.setForeground(item.getForeground());
+
+				text.setText(item.getText(column));
+				text.setForeground(item.getForeground());
+				text.selectAll();
+				text.setFocus();
+
+				tableEditor.minimumWidth = text.getBounds().width;
+
+				tableEditor.setEditor(text, item, column);
+
+				final int col = column;
+				text.addModifyListener(new ModifyListener() {
+					public void modifyText(ModifyEvent event) {
+						item.setText(col, getTableString(text.getText()));
+
+					}
+				});
+
 			}
-			
+
 		});
-	    
-	    table.addListener(SWT.MouseDown, new Listener() {
-			
+
+		table.addListener(SWT.MouseDown, new Listener() {
+
 			@Override
 			public void handleEvent(Event event) {
-		        Control old = tableEditor.getEditor();
-		        if (old != null)
-		          old.dispose();
-				
+				Control old = tableEditor.getEditor();
+				if (old != null)
+					old.dispose();
+
 			}
 		});
 
@@ -289,8 +289,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		super.pageChange(newPageIndex);
 		if (newPageIndex == 2) {
 			sortWords();
-		}
-		else if(newPageIndex == 3){
+		} else if (newPageIndex == 3) {
 			showFontTable();
 		}
 	}
@@ -336,88 +335,98 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	void sortWords() {
 
 		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-		
+
 		text.setText(editorText.toString());
 		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
 		text.setFont(font);
 		hexText = text.getText();
-		
+
 		String temp = getFontString(hexText);
 
 		text.setText(temp);
 	}
-	
-	void showFontTable(){
+
+	void showFontTable() {
 		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 		text.setText(editorText.toString());
 		hexText = text.getText();
-		
+
 		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
 		table.setFont(font);
-		
+
 		table.removeAll();
-		
+
 		ArrayList<String> data = new ArrayList<>();
-		
-		
-		for(int i=0; i<getFontString(hexText).length(); i++){
+
+		for (int i = 0; i < getFontString(hexText).length(); i++) {
 			data.add(String.valueOf(getFontString(hexText).charAt(i)));
 		}
-		
+
 		int dataSize = data.size();
 		int j = 0, key = 1;
-		
-		while(dataSize > 0){
+
+		while (dataSize > 0) {
 			int index = 0;
-			
-			if(dataSize <= 16){
+
+			if (dataSize <= 16) {
 				TableItem item1 = new TableItem(table, SWT.CENTER);
-				for(int i = j*16; i< data.size(); i++){
+				for (int i = j * 16; i < data.size(); i++) {
 					item1.setText(index, data.get(i));
 					index++;
 				}
-				
+
 				dataSize = 0;
-			}
-			else if(dataSize > 16){
-				
+			} else if (dataSize > 16) {
+
 				TableItem item1 = new TableItem(table, SWT.NONE);
-				for(int i = data.size() - dataSize; i < key*16; i++){
+				for (int i = data.size() - dataSize; i < key * 16; i++) {
 					item1.setText(index, data.get(i));
 					index++;
 				}
-				
-				dataSize-=16;
-				
+
+				dataSize -= 16;
+
 				j++;
 			}
-			
+
 			key++;
-		
+
+		}
+
+	}
+	
+	public String getTableString(String tableText){
+		if(tableText.matches("[0-9A-Fa-f]{2}")){
+			String temp1 =  "\\u00" + tableText;
+			char temp2 = (char) Integer.parseInt(temp1.substring(2), 16);
+
+			String s = "\\u" + Integer.toHexString((short) temp2 + 57360);
+			char a = (char) Integer.parseInt(s.substring(2), 16);
+			return String.valueOf(a);
+		}
+		else{
+			return tableText;
 		}
 		
 	}
-	
-	public String getFontString(String hexText){
+
+	public String getFontString(String hexText) {
 		String temp = "";
-		
-		for(int i = 0; i < hexText.length(); i++){
+
+		for (int i = 0; i < hexText.length(); i++) {
 			char c = hexText.charAt(i);
-			String s = "\\u" + Integer.toHexString((int) c + 57360);
+			String s = "\\u" + Integer.toHexString((short) c + 57360);
 			char a = (char) Integer.parseInt(s.substring(2), 16);
 			temp += String.valueOf(a);
 		}
-		
-		
+
 		return temp;
 	}
-	
-	public String getHexString(Text text){
+
+	public String getHexString(Text text) {
 		String hexText = text.getText();
-		
+
 		return getFontString(hexText);
 	}
-	
-	
-	
+
 }
