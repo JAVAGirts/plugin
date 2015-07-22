@@ -1,6 +1,5 @@
 package editor.editors;
 
-import java.awt.FlowLayout;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IMarker;
@@ -21,10 +20,8 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -66,6 +63,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	private Table table, table2;
 	
 	private String hexText;
+	
 
 	/**
 	 * Creates a multi-page editor example.
@@ -133,20 +131,30 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	 * Creates page 3 of the multi-page editor, which shows the table.
 	 */
 	void createPage3(){
+		
+
 		Composite composite = new Composite(getContainer(), SWT.NONE);
 		FillLayout layout = new FillLayout();
 		composite.setLayout(layout);
 		int index = addPage(composite);
 		setPageText(index, "CharTable");
 	    
-
-		
 		table = new Table(composite, SWT.SINGLE | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		 for (int loopIndex = 0; loopIndex < 16; loopIndex++) {
+		char ch = 65;
+		 for (int loopIndex = 0; loopIndex < 17; loopIndex++) {
 		      TableColumn column = new TableColumn(table, SWT.CENTER);
-		      column.setText(String.valueOf(loopIndex));
+		      if(loopIndex == 16)
+		    	 column.setText("ASCII");
+		      else if(loopIndex > 9)
+		      {
+		    	 column.setText(String.valueOf(ch));
+		    	 ch++;
+		      }
+		      else
+		         column.setText(String.valueOf(loopIndex));
+		      
 		      column.setWidth(30);
 		      column.setResizable(false);
 		 }
@@ -215,41 +223,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		          old.dispose();
 				
 			}
-		});
-	    
-		table2 = new Table(composite, SWT.BORDER);
-		table2.setHeaderVisible(true);
-		 for (int loopIndex = 0; loopIndex < 1; loopIndex++) {
-		      TableColumn column = new TableColumn(table2, SWT.CENTER);
-		      column.setText("ASCII");
-		      column.setWidth(180);
-		 }
-		 font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
-		 
-		 table2.setFont(font);
-		 text.setFont(font);
-		
-	}
-	void createPage4() {
-		Composite composite = new Composite(getContainer(), SWT.NONE);
-		FillLayout layout = new FillLayout();
-		composite.setLayout(layout);
-		text.setEditable(true);
-		int index = addPage(composite);
-		setPageText(index, "Dump");
-		
-		table2 = new Table(composite, SWT.BORDER);
-		table2.setHeaderVisible(true);
-		 for (int loopIndex = 0; loopIndex < 1; loopIndex++) {
-		      TableColumn column = new TableColumn(table2, SWT.LEFT);
-		      column.setText("Dump");
-		      column.setWidth(180);
-		 }
-		 font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
-		 
-		 table2.setFont(font);
-		 text.setFont(font);
-		
+		});	     
+
 	}
 	/**
 	 * Creates the pages of the multi-page editor.
@@ -259,7 +234,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		createPage1();
 		createPage2();
 		createPage3();
-//		createPage4();
 	}
 
 	/**
@@ -327,9 +301,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		if(newPageIndex == 3){
 			showFontTable();
 		}
-//		else if(newPageIndex == 4){
-//			dumpLineWrapper();
-//		}
 	}
 
 	/**
@@ -397,8 +368,24 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		ArrayList<String> data = new ArrayList<String>();
 		
 		
+		
+		
+		editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		editorText = editorText.trim();
+		editorText = editorText.replace("\n", "/").replace("\r", "/");	 // line separator remove
+		String splittedString[] = editorText.split("(?<=\\G.{" + 16 + "})");
+		int counter = 0;
+		int idx = 0;
+		
 		for(int i=0; i<getFontString(hexText).length(); i++){
 			data.add(String.valueOf(getFontString(hexText).charAt(i)));
+			counter++;
+			if(counter == 16)
+			{			   
+			   data.add(splittedString[idx]);
+			   idx++;
+			   counter = 0;
+			}
 		}
 		
 		int dataSize = data.size();
@@ -407,33 +394,32 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		while(dataSize > 0){
 			int index = 0;
 			
-			if(dataSize <= 16){
+			if(dataSize <= 17){
 				TableItem item1 = new TableItem(table, SWT.CENTER);
-				for(int i = j*16; i< data.size(); i++){
+				for(int i = j*17; i< data.size(); i++){
 					item1.setText(index, data.get(i));
 					index++;
 				}
 				
 				dataSize = 0;
 			}
-			else if(dataSize > 16){
+			else if(dataSize > 17){
 				
 				TableItem item1 = new TableItem(table, SWT.NONE);
-				for(int i = data.size() - dataSize; i < key*16; i++){
+				for(int i = data.size() - dataSize; i < key*17; i++){
 					item1.setText(index, data.get(i));
 					index++;
 				}
 				
-				dataSize-=16;
-				
+				dataSize-=17;
 				j++;
 			}
 			
 			key++;
-		
+			
 		}
 		
-		dumpLineWrapper();
+//		dumpLineWrapper();
 		
 	}
 	
@@ -465,19 +451,17 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		editorText = editorText.replace("\n", "/").replace("\r", "/");	 // line separator remove
 		
 		String splittedString[] = editorText.split("(?<=\\G.{" + 16 + "})");
-
+		
 		table2.clearAll();
 		table2.removeAll();
-		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
 		for(int i = 0; i < splittedString.length; i++) 
 		{
 			TableItem tmpRow = new TableItem(table2, SWT.CENTER);
 			tmpRow.setText(splittedString[i]);
-
-			tmpRow.setFont(font);
 		}
 		
 
-	}
+	}		
+
 	
 }
