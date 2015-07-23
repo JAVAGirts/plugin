@@ -22,18 +22,25 @@ public void testMeth(final Table table, final TableItem item, final int index, i
 				String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 				StringBuilder builderText = new StringBuilder(editorT);
 
-				if (text.getText().equals("")) {
+				if (text.getText().equals("") && itemc == builderText.length()-1) {
 					String tempt = builderText.toString();
 					item.setText(col, "");
 					tempt = tempt.substring(0, itemc) + tempt.substring(itemc + 1, tempt.length());
 					editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
 					//text.setText(item.getText(col));
 					//showFontTable();
+					
+			        String sentence = table.getItem(row).getText(17);
+		  			StringBuilder sb = new StringBuilder(sentence);
+		  			sb.deleteCharAt(sb.length() - 1);
+		  			table.getItem(row).setText(17, String.valueOf(sb));
+		  			table.redraw();
+					
 					Control old = tableEditor.getEditor();
 					old.dispose();
-					if (col == 0) {
+					if (col == 1) {
 						TableItem item2 = table.getItem(index -1);
-						testMeth(table, item2, index - 1, 15);
+						testMeth(table, item2, index - 1, 16);
 					} else {
 						testMeth(table, item, index, col - 1);
 					}
@@ -82,6 +89,7 @@ public void testMeth(final Table table, final TableItem item, final int index, i
 					
 		  			Control old = tableEditor.getEditor();
 					old.dispose();
+					
 					if (col + 1 == 17) {
 						TableItem item2 = table.getItem(index + 1);
 						testMeth(table, item2, index + 1, 1);
