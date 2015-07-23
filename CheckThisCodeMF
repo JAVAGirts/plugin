@@ -1,0 +1,133 @@
+public void testMeth(final Table table, final TableItem item, final int index, int column) {
+
+		final Text text = new Text(table, SWT.NONE);
+		// text.setForeground(item.getForeground());
+
+		beforeText = item.getText(column);
+
+		text.setText(item.getText(column));
+		// text.setForeground(item.getForeground());
+		text.selectAll();
+		text.setFocus();
+
+		tableEditor.minimumWidth = text.getBounds().width;
+
+		tableEditor.setEditor(text, item, column);
+
+		final int col = column;
+		final int itemc = index * 16 + col - 1;
+		final int row = index;
+		text.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent event) {
+				String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+				StringBuilder builderText = new StringBuilder(editorT);
+				
+				/*if(editor.getDocumentProvider().getDocument(editor.getEditorInput()).get().length() % 16 == 0){
+	        		TableItem it = new TableItem(table, SWT.NONE);
+				}*/
+				
+				if (text.getText().equals("") && itemc == builderText.length()-1) {
+					String tempt = builderText.toString();
+					item.setText(col, "");
+					tempt = tempt.substring(0, itemc) + tempt.substring(itemc + 1, tempt.length());
+					editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
+					//text.setText(item.getText(col));
+					//showFontTable();
+					
+			        String sentence = table.getItem(row).getText(17);
+		  			StringBuilder sb = new StringBuilder(sentence);
+		  			sb.deleteCharAt(sb.length() - 1);
+		  			table.getItem(row).setText(17, String.valueOf(sb));
+		  			table.redraw();
+					
+		  			
+					Control old = tableEditor.getEditor();
+					old.dispose();
+					if(col == 16) table.remove(index+1);
+					if (col == 1) {
+						TableItem item2 = table.getItem(index -1);
+						testMeth(table, item2, index - 1, 16);
+						//table.remove(index);
+					} else {
+						testMeth(table, item, index, col - 1);
+					}
+				} else if (text.getText().length() == 2) {
+
+					String changedText = getTableString(text.getText());
+					item.setText(col, changedText);
+					int i = Integer.parseInt(text.getText(), 16);
+					if (itemc < builderText.length()) {
+						builderText.setCharAt(itemc, (char) i);
+						editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(builderText.toString());
+						text.setText(item.getText(col));
+						
+						char ch = table.getItem(row).getText(col).charAt(0);
+				  		String hexCh = "\\u" + Integer.toHexString((int) ch - 57360);
+				        ch = (char) Integer.parseInt(hexCh.substring(2), 16);	
+				        String sentence = table.getItem(row).getText(17);
+			  			StringBuilder sb = new StringBuilder(sentence);
+			  			sb.setCharAt(col - 1, ch);
+			  			table.getItem(row).setText(17, String.valueOf(sb));
+			  			table.redraw();
+						
+			  			Control old = tableEditor.getEditor();
+						old.dispose();
+						if (col + 1 == 17) {
+							TableItem item2 = table.getItem(index + 1);
+							testMeth(table, item2, index + 1, 1);
+						} else {
+							testMeth(table, item, index, col + 1);
+						}
+
+					} else if (itemc == builderText.length()) {
+						builderText.append((char) i);
+						if(col == 16) {
+							TableItem ti = new TableItem(table, SWT.NONE);
+						}
+					}
+					editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(builderText.toString());
+					text.setText(item.getText(col));
+					
+					char ch = table.getItem(row).getText(col).charAt(0);
+			  		String hexCh = "\\u" + Integer.toHexString((int) ch - 57360);
+			        ch = (char) Integer.parseInt(hexCh.substring(2), 16);
+			        String sentence = table.getItem(row).getText(17);
+		  			StringBuilder sb = new StringBuilder(sentence);
+		  			sb.append(ch);
+		  			table.getItem(row).setText(17, String.valueOf(sb));
+		  			table.redraw();
+					
+		  			Control old = tableEditor.getEditor();
+					old.dispose();
+					
+					
+					if (col + 1 == 17) {
+						TableItem item2 = table.getItem(index + 1);
+						testMeth(table, item2, index + 1, 1);
+					} else {
+						testMeth(table, item, index, col + 1);
+					}
+				}
+				
+				if (col == 17){
+					String editorT2 = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get().substring(row*16, row+16);
+					
+				}
+				
+				  /*if(col != 17){
+			        char ch = table.getItem(row).getText(col).charAt(0);
+		  			String hexCh = "\\u" + Integer.toHexString((int) ch - 57360);
+		            ch = (char) Integer.parseInt(hexCh.substring(2), 16);
+	  				
+	  				String sentence = table.getItem(row).getText(17);
+
+	  				StringBuilder sb = new StringBuilder(sentence);
+	  				sb.setCharAt(col - 1, ch);
+	  				
+	  				table.getItem(row).setText(17, String.valueOf(sb));
+	  				table.redraw();
+				  }*/
+
+			}
+		});
+	}
