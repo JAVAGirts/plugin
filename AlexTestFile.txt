@@ -2,12 +2,14 @@
 
 		final Text text = new Text(table, SWT.NONE);
 		
-		if(column != 17)
-			beforeText = Integer.toHexString((int)item.getText(column).charAt(0) - 57360);
+		beforeText = item.getText(column);
+		if(column != 17){
+			hexText = Integer.toHexString((int)item.getText(column).charAt(0) - 57360);
+			text.setText(hexText);
+		}
 		else
-			beforeText = item.getText(column);
-
-		text.setText(beforeText);
+			text.setText(item.getText(column));
+			
 		text.selectAll();
 		text.setFocus();
 
