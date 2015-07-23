@@ -1,25 +1,25 @@
-   public void testMeth(final Table table, final TableItem item, final int index, int column) {
+ public void testMeth(final Table table, final TableItem item, final int index, int column) {
 
 		final Text text = new Text(table, SWT.NONE);
-		
 		beforeText = item.getText(column);
-		if(column != 17){
+		if(column != 17 && item.getText(column) != ""){
 			hexText = Integer.toHexString((int)item.getText(column).charAt(0) - 57360);
 			text.setText(hexText);
 		}
 		else
 			text.setText(item.getText(column));
-			
+		
 		text.selectAll();
 		text.setFocus();
 
 		tableEditor.minimumWidth = text.getBounds().width;
-
+		
 		tableEditor.setEditor(text, item, column);
 
 		final int col = column;
 		final int itemc = index * 16 + col - 1;
 		final int row = index;
+		
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
 				String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
