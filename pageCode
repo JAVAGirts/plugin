@@ -14,6 +14,8 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -154,6 +156,16 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		tableEditor.horizontalAlignment = SWT.LEFT;
 		tableEditor.grabHorizontal = true;
 
+		table.addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				// TODO Auto-generated method stub
+				showFontTable();
+
+			}
+		});
+
 		table.addListener(SWT.MouseDoubleClick, new Listener() {
 
 			public void handleEvent(Event event) {
@@ -179,7 +191,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 						break;
 					}
 				}
-				
+
 				int itemCount = -1;
 				for (int i = 0, n = table.getItemCount(); i < n; i++) {
 					Rectangle rect = item.getBounds(i);
@@ -213,14 +225,14 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 					public void modifyText(ModifyEvent event) {
 						String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 						StringBuilder builderText = new StringBuilder(editorT);
-						
-						if(text.getText().equals("") && itemc == builderText.length() - 1){
+
+						if (text.getText().equals("") && itemc == builderText.length() - 1) {
 							String tempt = builderText.toString();
 							item.setText(col, "");
-							tempt = tempt.substring(0, itemc) + tempt.substring(itemc+1, tempt.length());
+							tempt = tempt.substring(0, itemc) + tempt.substring(itemc + 1, tempt.length());
 							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(tempt);
-						}else if(text.getText().length() == 2){
-							
+						} else if (text.getText().length() == 2) {
+
 							String changedText = getTableString(text.getText());
 							item.setText(col, changedText);
 							int i = Integer.parseInt(text.getText(), 16);
@@ -229,9 +241,9 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 							} else if (itemc == builderText.length()) {
 								builderText.append((char) i);
 							}
-							editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(builderText.toString());
+							editor.getDocumentProvider().getDocument(editor.getEditorInput())
+									.set(builderText.toString());
 						}
-						//item.setForeground(col, new Color(Display.getCurrent(), 0, 255, 0));
 					}
 				});
 
@@ -328,23 +340,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		}
 	}
 
-	void sortPage0() {
-		/*
-		 * String editorText =
-		 * editor.getDocumentProvider().getDocument(editor.getEditorInput()).get
-		 * ();
-		 * 
-		 * text.setText(editorText.toString()); font = new
-		 * Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
-		 * text.setFont(font); hexText = text.getText();
-		 * 
-		 * String temp = getFontString(hexText);
-		 * 
-		 * text.setText(temp);
-		 */
-
-	}
-
 	/**
 	 * Closes all project files on project close.
 	 */
@@ -386,8 +381,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 	void sortWords() {
 
 		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-		
-		//editorText = editorText.substring(0, 100);
+
+		editorText = editorText.substring(table.getTopIndex(), table.getTopIndex() + 1000);
 
 		text.setText(editorText.toString());
 		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
@@ -399,10 +394,60 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		text.setText(temp);
 
 	}
+	
+	void showFontTable2() {
+		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
+		editorText = editorText.substring(table.getTopIndex() * 16 - 5 * 16, table.getTopIndex() * 16 + 400);
+		text.setText(editorText.toString());
+		hexText = text.getText();
+
+		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		table.setFont(font);
+
+		table.removeAll();
+
+		ArrayList<String> data = new ArrayList<>();
+
+		for (int i = 0; i < getFontString(hexText).length(); i++) {
+			data.add(String.valueOf(getFontString(hexText).charAt(i)));
+		}
+
+		int dataSize = data.size();
+		int j = 0, key = 1;
+
+		while (dataSize > 0) {
+			int index = 0;
+
+			if (dataSize <= 16) {
+				TableItem item1 = new TableItem(table, SWT.CENTER);
+				for (int i = j * 16; i < data.size(); i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize = 0;
+			} else if (dataSize > 16) {
+
+				TableItem item1 = new TableItem(table, SWT.NONE);
+				for (int i = data.size() - dataSize; i < key * 16; i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize -= 16;
+
+				j++;
+			}
+
+			key++;
+
+		}
+
+	}
 
 	void showFontTable() {
 		String editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-		//editorText = editorText.substring(table.getTopIndex(), table.getTopIndex() + 1000);
+		editorText = editorText.substring(table.getTopIndex() * 16 + 5 * 16, table.getTopIndex() * 16 + 400);
 		text.setText(editorText.toString());
 		hexText = text.getText();
 
