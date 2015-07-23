@@ -196,11 +196,12 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
                   Rectangle rect = item.getBounds(i);
                   if (rect.contains(pt)) {
                     column = i;
+                    index = table.indexOf(item);
                     break;
                   }
                 }
          
-                if (column == -1) {
+                if (column == -1 || column == 0) {
                   return;
                 }
                  
@@ -217,11 +218,12 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
                 tableEditor.setEditor(text, item, column);
          
                 final int col = column;
-                final int itemc = index * 16 + col;
+                final int itemc = index * 16 + col - 1;
                 text.addModifyListener(new ModifyListener() {
                   public void modifyText(ModifyEvent event) {
 					String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 					StringBuilder builderText = new StringBuilder(editorT);
+					
 					if(col == 17)
 						item.setText(col, text.getText());
 					else if (text.getText().equals("") && itemc == builderText.length() - 1) {
