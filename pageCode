@@ -326,6 +326,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
 		final int col = column;
 		final int itemc = index * 16 + col;
+		final int row = index;
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
 				String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
@@ -378,6 +379,20 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 						testMeth(table, item, index, col + 1);
 					}
 				}
+				
+				  if(col != 17){
+			        char ch = table.getItem(row).getText(col).charAt(0);
+		  			String hexCh = "\\u" + Integer.toHexString((int) ch - 57360);
+		            ch = (char) Integer.parseInt(hexCh.substring(2), 16);
+	  				
+	  				String sentence = table.getItem(row).getText(17);
+
+	  				StringBuilder sb = new StringBuilder(sentence);
+	  				sb.setCharAt(col - 1, ch);
+	  				
+	  				table.getItem(row).setText(17, String.valueOf(sb));
+	  				table.redraw();
+				  }
 
 			}
 		});
