@@ -222,12 +222,9 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
                   public void modifyText(ModifyEvent event) {
 					String editorT = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 					StringBuilder builderText = new StringBuilder(editorT);
-					if(col != 17)
-						item.setText(col, getHexString(text));
-					else
+					if(col == 17)
 						item.setText(col, text.getText());
-					
-					if (text.getText().equals("") && itemc == builderText.length() - 1) {
+					else if (text.getText().equals("") && itemc == builderText.length() - 1) {
 						String tempt = builderText.toString();
 						item.setText(col, "");
 						tempt = tempt.substring(0, itemc) + tempt.substring(itemc + 1, tempt.length());
