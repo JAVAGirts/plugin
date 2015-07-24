@@ -1,5 +1,9 @@
-package hex.editors;
+package hexeditor.editors;
 
+import java.awt.Color;
+import java.awt.Label;
+import java.io.UnsupportedEncodingException;
+import java.security.acl.Group;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IMarker;
@@ -9,8 +13,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -18,13 +25,18 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -71,6 +83,10 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     private ArrayList<String> data;
     
     private ArrayList<TableItem> tableItemArray;
+    
+    private Composite tableComposite;
+    
+    int testint = 0;
  
     /**
      * Creates a multi-page editor example.
@@ -138,19 +154,108 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
      * Creates page 3 of the multi-page editor, which shows the table.
      */
     void createPage3(){
-         
  
-        Composite composite = new Composite(getContainer(), SWT.NONE);
-        FillLayout layout = new FillLayout();
-        composite.setLayout(layout);
+    	tableComposite = new Composite(getContainer(), SWT.NONE);
+        FillLayout fillLayout = new FillLayout(SWT.VERTICAL);
+//        fillLayout.marginHeight = 5;
+//        fillLayout.marginWidth = 5;
+        tableComposite.setLayout(fillLayout);
         
-        int index = addPage(composite);
+        Composite outer = new Composite(tableComposite, SWT.BORDER);
+        outer.setBackground( new org.eclipse.swt.graphics.Color( null, 207, 255, 206 )); // green
+        
+        FormLayout formLayout = new FormLayout();
+//        formLayout.marginHeight = 5;
+//        formLayout.marginWidth = 5;
+//        formLayout.spacing = 5;
+        outer.setLayout( formLayout );
+        
+        Composite innerBottom = new Composite( outer, SWT.BORDER );
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 4;
+        
+        GridData gridData = new GridData();
+        gridData.horizontalIndent = 20;
+      
+        
+        innerBottom.setLayout(gridLayout);
+        innerBottom.setLayoutData(gridData);
+        innerBottom.setBackground( null ); // default color
+        
+        FormData fData = new FormData();
+        fData.top = new FormAttachment( 96 );
+        fData.left = new FormAttachment( 0 );
+        fData.right = new FormAttachment( 100 ); 
+        fData.bottom = new FormAttachment( 100 );
+
+        innerBottom.setLayoutData( fData );
+        
+        Composite innerTop = new Composite( outer, SWT.BORDER );
+        innerTop.setLayout( fillLayout );
+        innerTop.setBackground( new org.eclipse.swt.graphics.Color( null, 255, 235, 223 ) ); // orange
+
+        fData = new FormData();
+        fData.top = new FormAttachment( 0 );
+        fData.left = new FormAttachment( 0 );
+        fData.right = new FormAttachment( 100 );
+        fData.bottom = new FormAttachment( innerBottom );
+        innerTop.setLayoutData( fData );
+        
+        /**
+         * File name
+         * Filesize in bytes
+         */
+        org.eclipse.swt.widgets.Label fileNameLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
+        fileNameLabel.setLayoutData(gridData);
+        
+        org.eclipse.swt.widgets.Label fileSizeLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
+        fileSizeLabel.setLayoutData(gridData);
+        
+        GridData offsetLabelData = new GridData();
+        offsetLabelData.horizontalIndent = 20;
+        org.eclipse.swt.widgets.Label searchOffsetLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
+        searchOffsetLabel.setLayoutData(offsetLabelData);
+        
+        /*
+         * GotoOffset search field
+         */
+        GridData searchFieldData = new GridData();
+        searchFieldData.heightHint = 14;
+        searchFieldData.widthHint = 70;
+        final Text searchTextField = new Text(innerBottom, SWT.BORDER);
+        searchTextField.setLayoutData(searchFieldData);
+        searchTextField.addListener(SWT.Traverse, new Listener() {
+			
+			public void handleEvent(Event e) {
+				if(e.detail == SWT.TRAVERSE_RETURN){
+					gotoOffset(searchTextField.getText());
+				}
+				
+			}
+		});
+        
+        fileNameLabel.setText("File name: " + editor.getTitle());
+        
+        String file = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+        text.setText(file);
+        try {
+			byte[] fileByte = file.getBytes("UTF-8");
+			fileSizeLabel.setText("Filesize: " + fileByte.length + " bytes");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+        
+        searchOffsetLabel.setText("Go to: ");
+        
+        int index = addPage(tableComposite);
         setPageText(index, "CharTable");
          
-        table = new Table(composite, SWT.SINGLE | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
-        table.setHeaderVisible(true);
-        table.setLinesVisible(true);
+        table = new Table(innerTop, SWT.SINGLE | SWT.BORDER);
         
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);  
+
         char ch = 65;
          for (int loopIndex = 0; loopIndex < 18; loopIndex++) {
               TableColumn column = new TableColumn(table, SWT.CENTER);
@@ -179,6 +284,41 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         tableEditor = new TableEditor(table);
         tableEditor.horizontalAlignment = SWT.LEFT;
         tableEditor.grabHorizontal = true;
+        
+		table.addKeyListener(new KeyListener() {
+
+			
+			public void keyReleased(KeyEvent arg0) {
+				
+
+			}
+
+		
+			public void keyPressed(KeyEvent arg0) {
+				
+				if (arg0.keyCode == SWT.ARROW_DOWN
+						&& table.getSelectionIndex() == 23) {
+					if (!(testint + 401 > editor.getDocumentProvider()
+							.getDocument(editor.getEditorInput()).get()
+							.length())) {
+
+						testint += 16;
+						showFontTable2(testint);
+						table.setSelection(22);
+					}
+				}
+
+				if (arg0.keyCode == SWT.ARROW_UP
+						&& table.getSelectionIndex() == 0) {
+					if (testint > 0) {
+						testint -= 16;
+						showFontTable2(testint);
+						table.setSelection(1);
+					}
+				}
+
+			}
+		});
           
         table.addListener(SWT.MouseDoubleClick, new Listener() {
          
@@ -210,7 +350,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
   				if (column == -1 || column == 0) {
   					return;
   				}
-  				
   				testMeth(table, item, index, column);
 
             }
@@ -224,29 +363,28 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
                 Control old = tableEditor.getEditor();
                 if (old != null)
                   old.dispose();
-                 
+
             }
         });      
  
     }
     
-    public void testMeth(final Table table, final TableItem item,
+	public void testMeth(final Table table, final TableItem item,
 			final int index, int column) {
 
 		final Text text = new Text(table, SWT.NONE);
 
 		beforeText = item.getText(column);
-		
+
 		if (column != 17 && !item.getText(column).equals("")) {
 			hexText = Integer
 					.toHexString((int) item.getText(column).charAt(0) - 57360);
 			text.setText(hexText);
-		}
-		else {
+		} else {
 			text.setText(item.getText(column));
 		}
-		
-		//text.setText(item.getText(column));
+		//
+		// text.setText(item.getText(column));
 
 		text.selectAll();
 		text.setFocus();
@@ -258,6 +396,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		final int col = column;
 		final int itemc = index * 16 + col - 1;
 		final int row = index;
+		final int testint2 = testint;
 
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
@@ -265,28 +404,48 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 						.getDocument(editor.getEditorInput()).get();
 				StringBuilder builderText = new StringBuilder(editorT);
 				
-				if (col == 17) {
-					if (text.getText().length() == 16) {
-						item.setText(col, text.getText());
-						for (int i = 0; i < 16; i++) {
-							String symbols = getFontString(text.getText());
-							table.getItem(row).setText(i + 1,
-									String.valueOf(symbols.charAt(i)));
-						}
-					}
-
-				} else if (text.getText().equals("")
-						&& itemc == builderText.length() - 1) {
+				/**
+				 * Puts offset value in the first column
+				 */
+				if(col == 17)
+				{
+						  if(text.getText().length() == 16)
+						  {
+							 int end = row * 16;
+							 String original = builderText.toString();
+							 String temp = original;
+							 
+							 temp = temp.substring(0, end) + text.getText();
+	  
+							 if(temp.length() < original.length()) 						
+							 {
+								original = original.substring(temp.length());							  
+								temp += original;		 
+							 }		 
+							 editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(temp);
+							 
+	                         item.setText(col, text.getText()); 
+	                         for(int i = 0; i < 16; i++)
+	                         {
+	                        	 String symbols = getFontString(text.getText()); 
+	                        	 table.getItem(row).setText(i+1, String.valueOf(symbols.charAt(i)));
+	                         }	
+						  }
+               
+				}
+				else if (text.getText().equals("")
+						&& itemc + testint2 == builderText.length() - 1) {
 					String tempt = builderText.toString();
 					item.setText(col, "");
-					tempt = tempt.substring(0, itemc)
-							+ tempt.substring(itemc + 1, tempt.length());
+					item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208));
+					tempt = tempt.substring(0, itemc + testint2)
+							+ tempt.substring(itemc + 1 + testint2,
+									tempt.length());
 					editor.getDocumentProvider()
 							.getDocument(editor.getEditorInput()).set(tempt);
 
 					String sentence = table.getItem(row).getText(17);
 					StringBuilder sb = new StringBuilder(sentence);
-					
 					sb.deleteCharAt(sb.length() - 1);
 					table.getItem(row).setText(17, String.valueOf(sb));
 					table.redraw();
@@ -295,10 +454,15 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 					old.dispose();
 					if (col == 16) {
 						table.remove(index + 1);
+						if(testint > 0){
+							testint-=16;
+							showFontTable2(testint);
+						}
 					}
 					if (col == 1) {
 						TableItem item2 = table.getItem(index - 1);
 						testMeth(table, item2, index - 1, 16);
+					
 					} else {
 						testMeth(table, item, index, col - 1);
 					}
@@ -306,10 +470,11 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
 					String changedText = getTableString(text.getText());
 					item.setText(col, changedText);
+					item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208)); // Color
 					int i = Integer.parseInt(text.getText(), 16);
 
-					if (itemc < builderText.length()) {
-						builderText.setCharAt(itemc, (char) i);
+					if (itemc + testint2 < builderText.length()) {
+						builderText.setCharAt(itemc + testint2, (char) i);
 						editor.getDocumentProvider()
 								.getDocument(editor.getEditorInput())
 								.set(builderText.toString());
@@ -331,14 +496,17 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 							TableItem item2 = table.getItem(index + 1);
 							testMeth(table, item2, index + 1, 1);
 						} else {
+							item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208)); // Color
 							testMeth(table, item, index, col + 1);
 						}
 
-					} else if (itemc == builderText.length()) {
+					} else if (itemc + testint2 == builderText.length()) {
 						builderText.append((char) i);
 						if (col == 16) {
 							TableItem tb = new TableItem(table, SWT.NONE);
-							// tb.setText(0, "xxxxxxxx");
+							tb.setText(0, generateOffset(row+1));
+							table.setSelection(table.getSelectionIndex() + 1);
+							//testint+=16;
 						}
 					}
 					editor.getDocumentProvider()
@@ -370,7 +538,170 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 			}
 		});
 	}
- 
+    
+//    public void testMeth(final Table table, final TableItem item, final int index, int column) {
+//
+//		final Text text = new Text(table, SWT.NONE);
+//
+//		beforeText = item.getText(column);
+//		
+//		
+//		
+//		if (column != 17 && !item.getText(column).equals("")) {
+//			hexText = Integer
+//					.toHexString((int) item.getText(column).charAt(0) - 57360);
+//			text.setText(hexText);
+//		} else {
+//			text.setText(item.getText(column));
+//		}
+//		
+//		text.selectAll();
+//		text.setFocus();
+//
+//		tableEditor.minimumWidth = text.getBounds().width;
+//
+//		tableEditor.setEditor(text, item, column);
+//
+//		final int col = column;
+//		final int itemc = index * 16 + col - 1;
+//		final int row = index;
+//
+//		text.addModifyListener(new ModifyListener() {
+//			public void modifyText(ModifyEvent event) {
+//				String editorT = editor.getDocumentProvider()
+//						.getDocument(editor.getEditorInput()).get();
+//				StringBuilder builderText = new StringBuilder(editorT);
+//				
+//				/**
+//				 * Puts offset value in the first column
+//				 */
+//				if(col == 17)
+//				{
+//						  if(text.getText().length() == 16)
+//						  {
+//							 int end = row * 16;
+//							 String original = builderText.toString();
+//							 String temp = original;
+//							 
+//							 temp = temp.substring(0, end) + text.getText();
+//	  
+//							 if(temp.length() < original.length()) 						
+//							 {
+//								original = original.substring(temp.length());							  
+//								temp += original;		 
+//							 }		 
+//							 editor.getDocumentProvider().getDocument(editor.getEditorInput()).set(temp);
+//							 
+//	                         item.setText(col, text.getText()); 
+//	                         for(int i = 0; i < 16; i++)
+//	                         {
+//	                        	 String symbols = getFontString(text.getText()); 
+//	                        	 table.getItem(row).setText(i+1, String.valueOf(symbols.charAt(i)));
+//	                         }	
+//						  }
+//                
+//				}
+//
+//				else if (text.getText().equals("") && itemc == builderText.length() - 1) {
+//					String tempt = builderText.toString();
+//					
+//					item.setText(col, "");
+//					item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208));
+//					
+//					tempt = tempt.substring(0, itemc)
+//							+ tempt.substring(itemc + 1, tempt.length());
+//					editor.getDocumentProvider()
+//							.getDocument(editor.getEditorInput()).set(tempt);
+//
+//					String sentence = table.getItem(row).getText(17);
+//					StringBuilder sb = new StringBuilder(sentence);
+//					sb.deleteCharAt(sb.length() - 1);
+//					table.getItem(row).setText(17, String.valueOf(sb));
+//					table.redraw();
+//
+//					Control old = tableEditor.getEditor();
+//					old.dispose();
+//					if (col == 16) {
+//						table.remove(index + 1);
+//					}
+//					if (col == 1) {
+//						TableItem item2 = table.getItem(index - 1);
+//						testMeth(table, item2, index - 1, 16);
+//					} else {
+//						testMeth(table, item, index, col - 1);
+//					}
+//				} else if (text.getText().length() == 2) {
+//				
+//					String changedText = getTableString(text.getText());
+//					item.setText(col, changedText);
+//					item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208)); // Color
+//					
+//					int i = Integer.parseInt(text.getText(), 16);
+//
+//					if (itemc < builderText.length()) {
+//						builderText.setCharAt(itemc, (char) i);
+//						editor.getDocumentProvider()
+//								.getDocument(editor.getEditorInput())
+//								.set(builderText.toString());
+//						text.setText(item.getText(col));
+//
+//						char ch = table.getItem(row).getText(col).charAt(0);
+//						String hexCh = "\\u"
+//								+ Integer.toHexString((int) ch - 57360);
+//						ch = (char) Integer.parseInt(hexCh.substring(2), 16);
+//						String sentence = table.getItem(row).getText(17);
+//						StringBuilder sb = new StringBuilder(sentence);
+//						sb.setCharAt(col - 1, ch);
+//						table.getItem(row).setText(17, String.valueOf(sb));
+//						table.redraw();
+//
+//						Control old = tableEditor.getEditor();
+//						old.dispose();
+//						if (col + 1 == 17) {
+//							TableItem item2 = table.getItem(index + 1);
+//							testMeth(table, item2, index + 1, 1);
+//						} else {
+//							item.setBackground(col, new org.eclipse.swt.graphics.Color(tableComposite.getDisplay(), 245, 201, 208)); // Color
+//							testMeth(table, item, index, col + 1);
+//						}
+//
+//					} else if (itemc == builderText.length()) {
+//						builderText.append((char) i);
+//						if (col == 16) {
+//							TableItem tb = new TableItem(table, SWT.NONE);
+//							tb.setText(0, generateOffset(row+1));
+//						}
+//					}
+//					editor.getDocumentProvider()
+//							.getDocument(editor.getEditorInput())
+//							.set(builderText.toString());
+//					text.setText(item.getText(col));
+//
+//					char ch = table.getItem(row).getText(col).charAt(0);
+//					String hexCh = "\\u"
+//							+ Integer.toHexString((int) ch - 57360);
+//					ch = (char) Integer.parseInt(hexCh.substring(2), 16);
+//					String sentence = table.getItem(row).getText(17);
+//					StringBuilder sb = new StringBuilder(sentence);
+//					sb.append(ch);
+//					table.getItem(row).setText(17, String.valueOf(sb));
+//					table.redraw();
+//
+//					Control old = tableEditor.getEditor();
+//					old.dispose();
+//
+//					if (col + 1 == 17) {
+//						TableItem item2 = table.getItem(index + 1);
+//						testMeth(table, item2, index + 1, 1);
+//					} else {
+//						testMeth(table, item, index, col + 1);
+//					}
+//				}
+//
+//			}
+//		});
+//	}
+    
     /**
      * Creates the pages of the multi-page editor.
      */
@@ -514,8 +845,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         tableItemArray = new ArrayList<TableItem>();
          
          
-         
-         
         editorText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
         editorText = editorText.trim();
         editorText = editorText.replace("\n", "/").replace("\r", "/");   // line separator remove
@@ -525,7 +854,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         int counter = 0;
         int idx = 0;
         			 
-            data.add("xxxxxxxx");
+        data.add(generateOffset(0));
+        
         for(int i=0; i<getFontString(hexText).length(); i++){
             data.add(String.valueOf(getFontString(hexText).charAt(i)));
             counter++;
@@ -539,13 +869,15 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         }
         
         
-	    	counter = 0;
+	    counter = 0;
+	    int lineCounter = 1;
 	    for(int i = 0; i < data.size(); i++)
 	    {
 	    	if(counter == 18)
 	    	{	    		
-	    		data.add(i, "xxxxxxxx");
+	    		data.add(i, generateOffset(lineCounter));
                 counter = 0;
+                lineCounter++;
 	    	}
 	    	    counter++;
 	    }
@@ -601,8 +933,124 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
             key++;
              
         }
-         
+
     }
+    
+	void showFontTable2(int beginIndex) {
+		String editorText = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+
+		if (editorText.length() >= 400) {
+			if (beginIndex + 400 > editorText.length()) {
+				editorText = editorText.substring(beginIndex,
+						editorText.length());
+			} else {
+				editorText = editorText.substring(beginIndex, beginIndex + 400);
+			}
+		}
+		text.setText(editorText.toString());
+		hexText = text.getText();
+
+		font = new Font(text.getDisplay(), "xDigitsClock", 12, SWT.NORMAL);
+		table.setFont(font);
+
+		table.removeAll();
+
+		data = new ArrayList<String>();
+		tableItemArray = new ArrayList<TableItem>();
+
+		editorText = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+		if (editorText.length() >= 400) {
+			if (beginIndex + 400 > editorText.length()) {
+				editorText = editorText.substring(beginIndex,
+						editorText.length());
+			} else {
+				editorText = editorText.substring(beginIndex, beginIndex + 400);
+			}
+		}
+		// editorText = editorText.trim();
+		editorText = editorText.replace("\n", "/").replace("\r", "/"); // line
+																		// separator
+																		// remove
+		String splittedString[] = editorText.split("(?<=\\G.{" + 16 + "})");
+
+		int counter = 0;
+		int idx = 0;
+
+		data.add(generateOffset(0));
+		for (int i = 0; i < getFontString(hexText).length(); i++) {
+			data.add(String.valueOf(getFontString(hexText).charAt(i)));
+			counter++;
+			if (counter == 16) {
+				data.add(splittedString[idx]);
+				idx++;
+				counter = 0;
+			}
+
+		}
+
+		counter = 0;
+		int lineCounter = 1;
+		for (int i = 0; i < data.size(); i++) {
+			if (counter == 18) {
+				data.add(i, generateOffset(lineCounter));
+				counter = 0;
+				lineCounter++;
+			}
+			counter++;
+		}
+
+		int something = 0;
+		if (!data.get(data.size() - 1).equals(
+				splittedString[splittedString.length - 1])) {
+			for (int i = data.size() - 1;; i--) {
+				if (data.get(i).charAt(0) >= 48 && data.get(i).charAt(0) <= 122)
+					break;
+
+				something = i;
+			}
+
+			for (int i = data.size(); i < something + 16; i++)
+				data.add("");
+
+			data.add(splittedString[splittedString.length - 1]);
+		}
+
+		int dataSize = data.size();
+		int j = 0, key = 1;
+
+		while (dataSize > 0) {
+			int index = 0;
+
+			if (dataSize <= 18) {
+				TableItem item1 = new TableItem(table, SWT.CENTER);
+				tableItemArray.add(item1);
+				for (int i = j * 18; i < data.size(); i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize = 0;
+			} else if (dataSize > 18) {
+
+				TableItem item1 = new TableItem(table, SWT.CENTER);
+				tableItemArray.add(item1);
+				for (int i = data.size() - dataSize; i < key * 18; i++) {
+					item1.setText(index, data.get(i));
+					index++;
+				}
+
+				dataSize -= 18;
+				j++;
+			}
+
+			key++;
+
+		}
+
+	}
+    
 	public String getTableString(String tableText) {
 		if (tableText.matches("[0-9A-Fa-f]{2}")) {
 			String temp1 = "\\u00" + tableText;
@@ -635,6 +1083,32 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
          
         return getFontString(hexText);
     }
+    
+    /**
+     * Offset generation
+     * @param num
+     * @return
+     */
+    public String generateOffset(int num)
+    {
+    	String begin = "000000";
+    	
+    	for(int i = 0; i <= num; i++)
+    		if(i == 16 || i == 256 || i == 4096 || i == 65536 || i == 1048576 || i == 16777216)  
+         	   begin = begin.substring(0, begin.length() - 1);
+    	  	
+    	return begin + Integer.toHexString(num) + "0";
+    }
+    
+    public void gotoOffset(String str){
+    	for(int i=0; i<table.getItemCount(); i++){
+    		if(str.equals(table.getItem(i).getText(0))){
+    			table.setSelection(i);
+    			break;
+    		}
+    	}
+    }
+    
        
  
      
