@@ -329,11 +329,13 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 						table.remove(index + 1);
 						if(testint > 0){
 							testint-=16;
+							showFontTable2(testint);
 						}
 					}
 					if (col == 1) {
 						TableItem item2 = table.getItem(index - 1);
 						testMeth(table, item2, index - 1, 16);
+					
 					} else {
 						testMeth(table, item, index, col - 1);
 					}
