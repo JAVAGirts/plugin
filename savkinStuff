@@ -1,1 +1,15 @@
 sudo cp editor_1.0.0.201507271518.jar /usr/share/eclipse/dropins/
+
+
+
+
+
+#!/bin/bash
+# My first script
+
+if [ -d "/home/savki11n" ]
+then
+	echo "That directory exists"
+else
+   	echo "Error: Directory does not exists."
+fi
