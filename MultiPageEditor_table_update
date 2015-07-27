@@ -95,6 +95,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     
     private Composite tableComposite;
     
+    private  org.eclipse.swt.widgets.Label fileSizeLabel;
+    
     int testint = 0;
  
     /**
@@ -181,6 +183,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         GridData gridData = new GridData();
         gridData.horizontalIndent = 20;
         gridData.grabExcessVerticalSpace = true;
+        gridData.widthHint = 200;
       
         
         innerBottom.setLayout(gridLayout);
@@ -213,7 +216,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         org.eclipse.swt.widgets.Label fileNameLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
         fileNameLabel.setLayoutData(gridData);
         
-        org.eclipse.swt.widgets.Label fileSizeLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
+        fileSizeLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
         fileSizeLabel.setLayoutData(gridData);
         
         GridData offsetLabelData = new GridData();
@@ -244,7 +247,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         fileNameLabel.setText("File name: " + editor.getTitle());
         
         GridData btnInsertData = new GridData();
-        btnInsertData.horizontalIndent = 470;
+        btnInsertData.horizontalIndent = 80;
         btnInsertData.heightHint = 20;
         btnInsertData.widthHint = 130;
         
@@ -255,7 +258,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
             public void widgetSelected(SelectionEvent event) {
             			 
-            		Composite composite = new Composite(getContainer(), SWT.NONE);
+            	Composite composite = new Composite(getContainer(), SWT.NONE);
             	if(table.getItem(table.getSelectionIndex()).getText(17).length() == 16)
             	{
 					InputDialog dlg = new InputDialog(composite.getShell(), "", "Input characters", 
@@ -307,15 +310,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
             
           });
         
-        String file = editor.getDocumentProvider()
-				.getDocument(editor.getEditorInput()).get();
-        text.setText(file);
-        try {
-			byte[] fileByte = file.getBytes("UTF-8");
-			fileSizeLabel.setText("Filesize: " + fileByte.length + " bytes");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+        checkFileSize();
         
         offsetArray = new ArrayList<String>();
         searchOffsetLabel.setText("Go to: ");
@@ -449,9 +444,10 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     
 	public void testMeth(final Table table, final TableItem item,
 			final int index, int column) {
-
+		checkFileSize();
+		
 		final Text text = new Text(table, SWT.NONE);
-
+		
 		beforeText = item.getText(column);
 
 		if (column != 17 && !item.getText(column).equals("")) {
@@ -501,6 +497,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 				}
 				else if (text.getText().equals("")
 						&& itemc + testint2 == builderText.length() - 1) {
+					
 					String tempt = builderText.toString();
 					item.setText(col, "");
 					item.setBackground(col, new org.eclipse.swt.graphics.Color(
@@ -529,17 +526,17 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 								showFontTable2(testint);
 							}
 						}
-						
 					}
 					if (col == 1) {
 						TableItem item2 = table.getItem(index - 1);
+						
 						testMeth(table, item2, index - 1, 16);
 
 					} else {
 						testMeth(table, item, index, col - 1);
 					}
 				} else if (text.getText().length() == 2) {
-
+					
 					String changedText = getTableString(text.getText());
 					item.setText(col, changedText);
 					item.setBackground(col, new org.eclipse.swt.graphics.Color(
@@ -617,7 +614,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 						testMeth(table, item, index, col + 1);
 					}
 				}
-
+				
 			}
 		});
 	}
@@ -697,6 +694,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         }
         if(newPageIndex == 3){
             showFontTable2(testint);
+            checkFileSize();
         }
     }
  
@@ -959,7 +957,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     }
     public void appendFile(String newText, int row)									
     {
-    	 int end = row * 16;
+    	 int end = row * 16 + testint;
 		 String originalText = editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
 		 String temp = originalText;
 		 
@@ -976,10 +974,17 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         }	
     }
     
-    
-    
-       
- 
+    public void checkFileSize(){
+        String file = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+        text.setText(file);
+        try {
+			byte[] fileByte = file.getBytes("UTF-8");
+			fileSizeLabel.setText("Filesize: " + fileByte.length + " bytes");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    }
      
 }
 
