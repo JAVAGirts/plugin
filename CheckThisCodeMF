@@ -1,4 +1,4 @@
-package hex.editors;
+package testmulti.editors;
 
 import java.awt.Color;
 import java.awt.Label;
@@ -88,6 +88,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 	private Composite tableComposite;
 
 	int testint = 0;
+	int newlineint = 0;
 
 	/**
 	 * Creates a multi-page editor example.
@@ -447,10 +448,12 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 					old.dispose();
 					if (col == 16) {
 						table.remove(index + 1);
-						if (testint > 0) {
+						/*if (testint > 0) {
 							testint -= 16;
-							showFontTable2(testint);
-						}
+							//showFontTable2(testint);
+							//testMeth(table, item, index, col - 1);
+						}*/
+						//testMeth(table, item, index, col - 1);
 					}
 					if (col == 1) {
 						TableItem item2 = table.getItem(index - 1);
@@ -467,6 +470,14 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 							tableComposite.getDisplay(), 245, 201, 208)); // Color
 					int i = Integer.parseInt(text.getText(), 16);
 
+					if (itemc + testint2 + 1 == builderText.length()) {
+						if (col == 16) {
+							TableItem tb = new TableItem(table, SWT.NONE);
+							tb.setText(0, generateOffset(row + 1 + newlineint));
+							table.setSelection(table.getSelectionIndex() + 1);
+							// testint+=16;
+						}
+					}
 					if (itemc + testint2 < builderText.length()) {
 						builderText.setCharAt(itemc + testint2, (char) i);
 						editor.getDocumentProvider()
@@ -488,6 +499,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 						old.dispose();
 						if (col + 1 == 17) {
 							TableItem item2 = table.getItem(index + 1);
+							//TableItem item2 = new TableItem(table, SWT.CENTER);
 							testMeth(table, item2, index + 1, 1);
 						} else {
 							item.setBackground(col,
@@ -501,7 +513,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 						builderText.append((char) i);
 						if (col == 16) {
 							TableItem tb = new TableItem(table, SWT.NONE);
-							tb.setText(0, generateOffset(row + 1));
+							tb.setText(0, generateOffset(row + 1 + newlineint));
 							table.setSelection(table.getSelectionIndex() + 1);
 							// testint+=16;
 						}
@@ -1023,6 +1035,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 		}
 
 		int dataSize = data.size();
+		int dataSize2 = dataSize;
 		int j = 0, key = 1;
 
 		while (dataSize > 0) {
@@ -1052,6 +1065,13 @@ public class MultiPageEditor extends MultiPageEditorPart implements
 
 			key++;
 
+		}
+		if(dataSize2 % 18 == 0){
+			newlineint = 1;
+			//TableItem item1 = new TableItem(table, SWT.CENTER);
+			//item1.setText(0, generateOffset(lineCounter+(testint/16)));
+			//testint+=16;
+			//tableItemArray.add(item1);
 		}
 
 	}
