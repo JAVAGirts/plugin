@@ -3,13 +3,17 @@ sudo cp editor_1.0.0.201507271518.jar /usr/share/eclipse/dropins/
 
 
 
-
 #!/bin/bash
 # My first script
 
-if [ -d "/home/savki11n" ]
+
+if [ -d "/usr/share/eclipse/dropins" ]
 then
-	echo "That directory exists"
+	sudo cp Hex_1.0.0.201507271451.jar /usr/share/eclipse/dropins/
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+	sudo cp $DIR/Fonts/xDigitsClock.ttf /usr/share/fonts/truetype/
+	sudo cp $DIR/Fonts/xDigitsSans.ttf /usr/share/fonts/truetype/
+	echo "Installed!"
 else
-   	echo "Error: Directory does not exists."
+   	echo "Install failed!"
 fi
