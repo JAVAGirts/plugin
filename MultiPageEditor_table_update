@@ -302,6 +302,42 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
             
           });
         
+        
+        
+        GridData btnFontData = new GridData();
+        btnFontData.horizontalIndent = 220;
+        
+        Label btnFontLabel = new Label(innerBottom, SWT.BORDER);
+        btnFontLabel.setLayoutData(btnFontData);
+        btnFontLabel.setText("Font: ");
+               
+        final Button btnChangeFont = new Button(innerBottom, SWT.BORDER);  
+        btnChangeFont.setText("xDigitsClock");
+        btnChangeFont.addSelectionListener(new SelectionListener() {
+
+            public void widgetSelected(SelectionEvent event) { 
+            	
+            	if(btnChangeFont.getText().equals("xDigitsClock"))
+            	{
+            	   font = new Font(text.getDisplay(), "xDigitsSans", 10, SWT.NORMAL);
+            	   btnChangeFont.setText("xDigitsSans");
+            	}
+            	else
+            	{
+            	   font = new Font(text.getDisplay(), "xDigitsClock", 10, SWT.NORMAL);
+             	   btnChangeFont.setText("xDigitsClock");
+            	}
+            	
+            	table.setFont(font);
+            	table.redraw();
+
+            }
+            public void widgetDefaultSelected(SelectionEvent event) {          
+            }
+            
+          });
+        
+        
         checkFileSize();
         
         searchOffsetLabel.setText("Go to: ");
