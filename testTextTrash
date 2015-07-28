@@ -1,15 +1,36 @@
-	@Test
-	public void generateOffsetTest(){
-		String st1 = "00000210";
-		String st2 = "00000f90";
-		String st3 = "00000aa0";
-		try{
-			Assert.assertEquals(st1, mp.generateOffset(33));
-			Assert.assertEquals(st2, mp.generateOffset(249));
-			Assert.assertEquals(st3, mp.generateOffset(170));
-		} catch (Error e) {
-			logger.log(Level.SEVERE, e.getMessage());
-			Assert.fail();
+void showFontTable2(int beginIndex) {
+		String editorText = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+
+		if (editorText.length() >= 600) {
+			if (beginIndex + 600 > editorText.length()) {
+				editorText = editorText.substring(beginIndex,
+						editorText.length());
+			} else {
+				editorText = editorText.substring(beginIndex, beginIndex + 600);
 			}
+		}
+		else{
+			editorText = editorText.substring(beginIndex,
+					editorText.length());
+		}
 		
+public void gotoOffset(String str) {
+		String testAddress = "0";
+
+		for (int i = 0; i < str.length(); i++) {
+			if (!String.valueOf(str.charAt(i)).equals("0")) {
+				testAddress = str.substring(i, str.length() - 1);
+				break;
+			}
+		}
+
+		String file = editor.getDocumentProvider()
+				.getDocument(editor.getEditorInput()).get();
+		if (file.length() >= Integer.decode("0x" + testAddress) * 16) {
+			testint = Integer.decode("0x" + testAddress) * 16;
+			showFontTable2(testint);
+			table.setSelection(0);
+		}
+
 	}
