@@ -1,9 +1,62 @@
-mbled it to maken book. It has but also 
-the leap into electronsagecof Losrem Ipsum.DÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝ
-ÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝ
-mbled it to maken book. It has but also 
-the leap into electronsagecof Losrem Ipsum.mbled it to maken book. It has but also 
-the leap into electronsagecof Losrem Ipsum.mbled it to maken book. It has but also 
-the leap into electronsagecof Losrem IpÝÝm.mbled ÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝ book. It has but also 
-the leap into electronsagecof Losrem Ipsum.mbled it to maken book. It has but also 
-ÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝÝ
+package hexeditor.editors;
+
+import static org.junit.Assert.*;
+
+import java.io.ByteArrayOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import hexeditor.editors.MultiPageEditor;
+
+public class UnitTests {
+	
+	String beforeText = "NO!";
+	MultiPageEditor mp = new MultiPageEditor();
+	
+	Logger logger = Logger.getLogger(MultiPageEditor.class.getName());
+	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	/*@Test
+	public void test() {
+		fail("Not yet implemented");
+	}*/
+	
+	@Test
+	public void test1(){
+		String st1 = "AA";
+		String st2 = "AAA";
+		String st3 = "41";
+		try{
+			Assert.assertEquals("", mp.getTableString(st1));
+			Assert.assertEquals(null, mp.getTableString(st2));
+			Assert.assertEquals("", mp.getTableString(st3));
+		} catch (Error e) {
+			logger.log(Level.SEVERE, e.getMessage());
+			Assert.fail();
+			}
+		
+	}
+
+}
