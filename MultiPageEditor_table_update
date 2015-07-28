@@ -256,6 +256,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 										"2111111111111112", new LengthValidator());
 					if(dlg.open() == Window.OK) 
 					{
+					   TableItem ti = new TableItem(table, SWT.NONE);	// <<<<<<<<<<<<<<  DO NOT DELETE!
+					   
 					   String normal = dlg.getValue();
 					   String hex = getFontString(normal);
 					   
