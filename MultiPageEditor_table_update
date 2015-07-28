@@ -1,12 +1,9 @@
 package hexeditor.editors;
 
-import java.awt.Color;
-import java.awt.Label;
 import java.io.UnsupportedEncodingException;
-import java.security.acl.Group;
 import java.util.ArrayList;
 
-import javax.swing.plaf.metal.MetalBorders.TableHeaderBorder;
+
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -18,7 +15,6 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.KeyEvent;
@@ -31,7 +27,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -39,14 +34,12 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FontDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -61,13 +54,13 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.ide.IDE;
  
 /**
- * An example showing how to create a multi-page editor. This example has 3
- * pages:
- * <ul>
- * <li>page 0 contains a nested text editor.
- * <li>page 1 allows you to change the font used in page 2
- * <li>page 2 shows the words in page 0 in sorted order
- * </ul>
+ * A hexadecimal editor main class.
+ * 
+ * page 0 contains a nested text editor.
+ * page 1 allows you to change the font used in page 2
+ * page 2 shows the words in page 0 in a special font
+ * page 3 shows hexadecimal editor
+ * 
  */
 public class MultiPageEditor extends MultiPageEditorPart implements IResourceChangeListener {
  
@@ -81,7 +74,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     /** The text widget used in page 2. */
     private StyledText text;
      
-    private Table table, table2;
+    private Table table;
      
     private String hexText;
     
@@ -91,11 +84,9 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     
     private ArrayList<TableItem> tableItemArray;
     
-    private ArrayList<String> offsetArray;
-    
     private Composite tableComposite;
     
-    private  org.eclipse.swt.widgets.Label fileSizeLabel;
+    private  Label fileSizeLabel;
     
     int testint = 0;
  
@@ -171,7 +162,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         tableComposite.setLayout(fillLayout);
         
         Composite outer = new Composite(tableComposite, SWT.BORDER);
-        outer.setBackground( new org.eclipse.swt.graphics.Color( null, 207, 255, 206 )); // green
+        outer.setBackground(null); 
         
         FormLayout formLayout = new FormLayout();
         outer.setLayout( formLayout );
@@ -191,7 +182,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         innerBottom.setBackground( null ); // default color
         
         FormData fData = new FormData();
-        fData.top = new FormAttachment( 96 );
+        fData.top = new FormAttachment( 92 );
         fData.left = new FormAttachment( 0 );
         fData.right = new FormAttachment( 100 ); 
         fData.bottom = new FormAttachment( 100 );
@@ -200,7 +191,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         
         Composite innerTop = new Composite( outer, SWT.BORDER );
         innerTop.setLayout( fillLayout );
-        innerTop.setBackground( new org.eclipse.swt.graphics.Color( null, 255, 235, 223 ) ); // orange
+        innerTop.setBackground(null);
 
         fData = new FormData();
         fData.top = new FormAttachment( 0 );
@@ -213,7 +204,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
          * File name
          * Filesize in bytes
          */
-        org.eclipse.swt.widgets.Label fileNameLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
+        Label fileNameLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
         fileNameLabel.setLayoutData(gridData);
         
         fileSizeLabel = new org.eclipse.swt.widgets.Label(innerBottom, SWT.BORDER);
@@ -248,7 +239,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         
         GridData btnInsertData = new GridData();
         btnInsertData.horizontalIndent = 80;
-        btnInsertData.heightHint = 20;
+        btnInsertData.heightHint = 30;
         btnInsertData.widthHint = 130;
         
         Button btnInsert = new Button(innerBottom, SWT.BORDER);
@@ -265,7 +256,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 										"2111111111111112", new LengthValidator());
 					if(dlg.open() == Window.OK) 
 					{
-					   TableItem ti = new TableItem(table, SWT.NONE);
 					   String normal = dlg.getValue();
 					   String hex = getFontString(normal);
 					   
@@ -312,7 +302,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         
         checkFileSize();
         
-        offsetArray = new ArrayList<String>();
         searchOffsetLabel.setText("Go to: ");
         
         int index = addPage(tableComposite);
@@ -323,36 +312,8 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
 
-        char ch = 65;
-         for (int loopIndex = 0; loopIndex < 18; loopIndex++) {
-              TableColumn column = new TableColumn(table, SWT.CENTER);
-              column.setResizable(true);
-              if(loopIndex == 0)
-              {
-                 column.setWidth(90);
-                 column.setText("OFFSET");
-              }       
-              else if(loopIndex == 17)
-              {
-                  column.setText("ASCII");
-                  column.pack();
-              }              
-              else if(loopIndex > 10)
-              {
-                 column.setText(String.valueOf(ch));
-                 ch++;
-                 column.setWidth(25);
-              }
-              else{
-                 column.setText(String.valueOf(loopIndex - 1));
-                 column.setWidth(25);
-                
-              }
-              
-              
-         }
-         
-          
+        generateColumns();
+
         tableEditor = new TableEditor(table);
         tableEditor.horizontalAlignment = SWT.LEFT;
         tableEditor.grabHorizontal = true;
@@ -480,13 +441,11 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 				 * Puts offset value in the first column
 				 */
 				if(col == 17){			
-						  if(row != table.getItemCount() - 1 && text.getText().length() == 16)
-						  {						 
+						  if(row != table.getItemCount() - 1 && text.getText().length() == 16){						 
 							 changeRowData(item, row, col, text);	 
 							 writeToFile(text.getText(), row);
 						  }
-						  else if(row == table.getItemCount() - 1 && text.getText().length() <= 16)
-						  { 
+						  else if(row == table.getItemCount() - 1 && text.getText().length() <= 16){ 
 							 changeRowData(item, row, col, text);
 				             for(int i = text.getText().length() + 1; i < 17; i++)
 				                 table.getItem(row).setText(i, "");
@@ -773,16 +732,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		data = new ArrayList<String>();
 		tableItemArray = new ArrayList<TableItem>();
 
-		editorText = editor.getDocumentProvider()
-				.getDocument(editor.getEditorInput()).get();
-		if (editorText.length() >= 600) {
-			if (beginIndex + 600 > editorText.length()) {
-				editorText = editorText.substring(beginIndex,
-						editorText.length());
-			} else {
-				editorText = editorText.substring(beginIndex, beginIndex + 600);
-			}
-		}
 		editorText = editorText.replace("\n", "/").replace("\r", "/"); // line
 																		// separator
 																		// remove
@@ -863,6 +812,38 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		}
 
 	}
+	
+	/**
+	 * Generates columns
+	 */
+	public void generateColumns(){
+        char ch = 65;
+        for (int loopIndex = 0; loopIndex < 18; loopIndex++) {
+             TableColumn column = new TableColumn(table, SWT.CENTER);
+             column.setResizable(true);
+             if(loopIndex == 0)
+             {
+                column.setWidth(90);
+                column.setText("OFFSET");
+             }       
+             else if(loopIndex == 17)
+             {
+                 column.setText("ASCII");
+                 column.setWidth(40);
+             }              
+             else if(loopIndex > 10)
+             {
+                column.setText(String.valueOf(ch));
+                ch++;
+                column.setWidth(50);
+             }
+             else{
+                column.setText(String.valueOf(loopIndex - 1));
+                column.setWidth(50);
+               
+             }
+        }
+	}
     
 	public String getTableString(String tableText) {
 		if (tableText.matches("[0-9A-Fa-f]{2}")) {
@@ -929,8 +910,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     	
     }
     
-    public void writeToFile(String newText, int row)								
-    {   	
+    public void writeToFile(String newText, int row){   	
 		 int end = row * 16;
 		 
 		 String originalText = "";
