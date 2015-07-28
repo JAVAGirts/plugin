@@ -305,7 +305,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         
         
         GridData btnFontData = new GridData();
-        btnFontData.horizontalIndent = 220;
+        btnFontData.horizontalIndent = 200;
         
         Label btnFontLabel = new Label(innerBottom, SWT.BORDER);
         btnFontLabel.setLayoutData(btnFontData);
