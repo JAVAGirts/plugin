@@ -2,9 +2,6 @@ package hexeditor.editors;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
-
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -15,6 +12,7 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.KeyEvent;
@@ -82,13 +80,11 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     
     private ArrayList<String> data;
     
-    private ArrayList<TableItem> tableItemArray;
-    
     private Composite tableComposite;
     
     private  Label fileSizeLabel;
     
-    int testint = 0;
+    private int testint = 0;
  
     /**
      * Creates a multi-page editor example.
@@ -112,33 +108,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     }
  
     /**
-     * Creates page 1 of the multi-page editor, which allows you to change the
-     * font used in page 2.
-     */
-    void createPage1() {
- 
-        Composite composite = new Composite(getContainer(), SWT.NONE);
-        GridLayout layout = new GridLayout();
-        composite.setLayout(layout);
-        layout.numColumns = 2;
- 
-        Button fontButton = new Button(composite, SWT.NONE);
-        GridData gd = new GridData(GridData.BEGINNING);
-        gd.horizontalSpan = 2;
-        fontButton.setLayoutData(gd);
-        fontButton.setText("Change Font...");
- 
-        fontButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent event) {
-                setFont();
-            }
-        });
- 
-        int index = addPage(composite);
-        setPageText(index, "Properties");
-    }
- 
-    /**
      * Creates page 2 of the multi-page editor, which shows the sorted text.
      */
     void createPage2() {
@@ -149,7 +118,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         text.setEditable(false);
         int index = addPage(composite);
         setPageText(index, "Preview");
- 
     }
      
     /**
@@ -157,7 +125,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
      */
     void createPage3(){
  
-    	tableComposite = new Composite(getContainer(), SWT.NONE);
+    	tableComposite = new Composite(getContainer(), SWT.BORDER);
         FillLayout fillLayout = new FillLayout(SWT.VERTICAL);
         tableComposite.setLayout(fillLayout);
         
@@ -169,14 +137,13 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
         
         Composite innerBottom = new Composite( outer, SWT.BORDER );
         GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 5;
+        gridLayout.numColumns = 7;
         
         GridData gridData = new GridData();
         gridData.horizontalIndent = 20;
         gridData.grabExcessVerticalSpace = true;
         gridData.widthHint = 200;
       
-        
         innerBottom.setLayout(gridLayout);
         innerBottom.setLayoutData(gridData);
         innerBottom.setBackground( null ); // default color
@@ -256,8 +223,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 										"2111111111111112", new LengthValidator());
 					if(dlg.open() == Window.OK) 
 					{
-					   TableItem ti = new TableItem(table, SWT.NONE);	// <<<<<<<<<<<<<<  DO NOT DELETE!
-					   
+					   TableItem ti = new TableItem(table, SWT.NONE); 
 					   String normal = dlg.getValue();
 					   String hex = getFontString(normal);
 					   
@@ -302,8 +268,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
             
           });
         
-        
-        
         GridData btnFontData = new GridData();
         btnFontData.horizontalIndent = 200;
         
@@ -333,10 +297,10 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
             }
             public void widgetDefaultSelected(SelectionEvent event) {          
+            
             }
             
           });
-        
         
         checkFileSize();
         
@@ -537,7 +501,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 					String changedText = getTableString(text.getText());
 					item.setText(col, changedText);
 					item.setBackground(col, new org.eclipse.swt.graphics.Color(
-							tableComposite.getDisplay(), 245, 201, 208)); // Color
+							tableComposite.getDisplay(), 245, 201, 208)); 
 					int i = Integer.parseInt(text.getText(), 16);
 
 					if (itemc + testint2 + 1 == builderText.length()) {
@@ -622,7 +586,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
      */
     protected void createPages() {
         createPage0();
-        createPage1();
         createPage2();
         createPage3();
     }
@@ -686,11 +649,12 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
      */
     protected void pageChange(int newPageIndex) {
         super.pageChange(newPageIndex);
-        if (newPageIndex == 2) {
+        if (newPageIndex == 1) {
             sortWords();
         }
-        if(newPageIndex == 3){
+        if(newPageIndex == 2){
             showFontTable2(testint);
+            table.setSelection(0);
             checkFileSize();
         }
     }
@@ -751,14 +715,19 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		String editorText = editor.getDocumentProvider()
 				.getDocument(editor.getEditorInput()).get();
 
-		if (editorText.length() >= 600) {
-			if (beginIndex + 600 > editorText.length()) {
+		if (editorText.length() >= 592) {
+			if (beginIndex + 592 > editorText.length()) {
 				editorText = editorText.substring(beginIndex,
 						editorText.length());
 			} else {
-				editorText = editorText.substring(beginIndex, beginIndex + 600);
+				editorText = editorText.substring(beginIndex, beginIndex + 592);
 			}
 		}
+		else{
+			editorText = editorText.substring(beginIndex,
+					editorText.length());
+		}
+		
 		text.setText(editorText.toString());
 		hexText = text.getText();
 
@@ -768,7 +737,7 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 		table.removeAll();
 
 		data = new ArrayList<String>();
-		tableItemArray = new ArrayList<TableItem>();
+	
 
 		editorText = editorText.replace("\n", "/").replace("\r", "/"); // line
 																		// separator
@@ -825,7 +794,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 
 			if (dataSize <= 18) {
 				TableItem item1 = new TableItem(table, SWT.CENTER);
-				tableItemArray.add(item1);
 				for (int i = j * 18; i < data.size(); i++) {
 					item1.setText(index, data.get(i));
 					index++;
@@ -835,7 +803,6 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
 			} else if (dataSize > 18) {
 
 				TableItem item1 = new TableItem(table, SWT.CENTER);
-				tableItemArray.add(item1);
 				for (int i = data.size() - dataSize; i < key * 18; i++) {
 					item1.setText(index, data.get(i));
 					index++;
@@ -933,20 +900,34 @@ public class MultiPageEditor extends MultiPageEditorPart implements IResourceCha
     	return begin;
     }
     
-    public void gotoOffset(String str){
-    	String testAddress = "0";
-    	
-    	for(int i=0; i<str.length(); i++){
-    		if(!String.valueOf(str.charAt(i)).equals("0")){
-    			testAddress = str.substring(i, str.length()-1);
-    			break;
-    		}
-    	}
-    	testint = Integer.decode("0x" + testAddress) * 16;
-    	showFontTable2(testint);
-    	table.setSelection(0);
-    	
-    }
+	
+	public void gotoOffset(String str) {
+		String testAddress = "0";
+		
+		if(str.length() == 8){
+			for (int i = 0; i < str.length(); i++) {
+				if (!String.valueOf(str.charAt(i)).equals("0")) {
+					testAddress = str.substring(i, str.length() - 1);
+					break;
+				}
+			}
+			String file = editor.getDocumentProvider()
+					.getDocument(editor.getEditorInput()).get();
+			if (file.length() >= Integer.decode("0x" + testAddress) * 16) {
+				testint = Integer.decode("0x" + testAddress) * 16;
+				showFontTable2(testint);
+				table.setSelection(0);
+			}
+		}
+		else{
+    		MessageBox dialog = new MessageBox(tableComposite.getShell(), SWT.ICON_ERROR | SWT.OK);
+    		dialog.setText("Title");
+    		dialog.setMessage("OFFSET must be 8 characters long!");
+    		dialog.open();
+		}
+		
+	
+	}
     
     public void writeToFile(String newText, int row){   	
 		 int end = row * 16;
