@@ -1,35 +1,7 @@
-				boolean append = true;
-					try
-					{
-						text.setText(item.getText(col));  // FIXME
-					}
-					catch(Exception e)
-					{
-						append = false;
-					}
-					
-					if(append == true)
-					{
-						char ch = table.getItem(row).getText(col).charAt(0);
-						String hexCh = "\\u"
-								+ Integer.toHexString((int) ch - 57360);
-						ch = (char) Integer.parseInt(hexCh.substring(2), 16);
-						String sentence = table.getItem(row).getText(17);
-						StringBuilder sb = new StringBuilder(sentence);
-						
-						sb.append(ch);
-	//					sb.setCharAt(col-1, ch);			// FIXME 
-	
-						table.getItem(row).setText(17, String.valueOf(sb));
-						table.redraw();
-	
-						Control old = tableEditor.getEditor();
-						old.dispose();
-	
-						if (col + 1 == 17) {
-							TableItem item2 = table.getItem(index + 1);
-							testMeth(table, item2, index + 1, 1);
-						} else {
-							testMeth(table, item, index, col + 1);
-						}
-					}
+        GridData btnInsertBitsData = new GridData();
+        btnInsertBitsData.heightHint = 30;
+        btnInsertBitsData.widthHint = 130;
+        
+        Button btnInsertBits = new Button(innerBottom, SWT.BORDER);
+        btnInsertBits.setText("Insert bits");
+        btnInsertBits.setLayoutData(btnInsertBitsData);
