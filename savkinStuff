@@ -1,7 +1,16 @@
-        GridData btnInsertBitsData = new GridData();
-        btnInsertBitsData.heightHint = 30;
-        btnInsertBitsData.widthHint = 130;
+     table.addListener(SWT.MouseDown, new Listener() {
+    		public void handleEvent(Event event) {
+    			Point pt = new Point(event.x, event.y);
+    			TableItem item = table.getItem(pt);
+    			if (item == null)
+    				return;
+    			for (int i = 0; i < table.getItemCount(); i++) {
+    				Rectangle rect = item.getBounds(i);
+    				if (rect.contains(pt)) {
+    					int index = table.indexOf(item);
+    					System.out.println("Item " + index + "-" + i);
+    				}
+    			}
+    		}
+    	});
         
-        Button btnInsertBits = new Button(innerBottom, SWT.BORDER);
-        btnInsertBits.setText("Insert bits");
-        btnInsertBits.setLayoutData(btnInsertBitsData);
