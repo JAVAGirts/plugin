@@ -1,0 +1,50 @@
+1. Business analysis and analysis of  given input
+
+Reklama
+Problemas aktualitate
+
+
+2. Project planning and used approach
+
+Plan
+Agile
+
+3. System design and code structure
+
+Description, plugin, hex
+Tehnologijas
+
+4. System data model
+
+File -> Tabula -> File
+
+5. Automated unit and/or system tests
+
+Unit  tests (methods)
+System tests ()
+
+6. System building and deployment (compiling, testing, and deployment)
+
+MAVEN
+Installation
+
+*******
+
+7. User and administrator documentation
+
+Readme
+
+8. System set up, execution and maintenance
+
+9.  System demonstration
+
+10.     Final overview:
+        Main features of the project 
+        List of team members and their main contribution to project,
+        Biggest challenges in the project and lessons learned.
+
+11. Future work
+
+11.1. Inserting symbol at any place in the file (Currently it is only possible to append symbols at the end of the file) 
+11.2. Deleting symbols at any place in the file (Currently it is only possible to delete symbols at the end of the file)
+11.3. Loading new section of file by mouse scrolling
